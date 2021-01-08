@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:facebook="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="10dp"
+    android:layout_marginBottom="15dp">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/imgAvatar"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_alignParentTop="true"
+        android:layout_margin="7dp"
+        facebook:layout_constraintStart_toStartOf="parent"
+        facebook:layout_constraintTop_toTopOf="parent"></de.hdodenhof.circleimageview.CircleImageView>
+
+    <TextView
+        android:id="@+id/txtName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_margin="7dp"
+        android:text="User Name"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        facebook:layout_constraintStart_toEndOf="@+id/imgAvatar"
+        facebook:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/txtCreateAt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="11dp"
+        android:layout_marginTop="11dp"
+        android:text="6 hrs"
+        android:textSize="@dimen/com_facebook_likeview_text_size"
+        facebook:layout_constraintStart_toEndOf="@+id/imgAvatar"
+        facebook:layout_constraintTop_toBottomOf="@+id/txtName" />
+    <TextView
+        android:id="@+id/txtTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_margin="7dp"
+        android:text="abcnsdfsddfsffasddfsd"
+        android:textSize="16sp"
+        facebook:layout_constraintTop_toBottomOf="@+id/imgAvatar"
+        facebook:layout_constraintStart_toStartOf="parent"
+        />
+    <com.google.android.exoplayer2.ui.PlayerView
+        android:id="@+id/vdPost"
+        android:layout_width="match_parent"
+        android:layout_height="175dp"
+        android:layout_alignParentTop="true"
+        android:layout_margin="7dp"
+        app:useDefaultControls="true"
+        facebook:layout_constraintStart_toStartOf="parent"
+        facebook:layout_constraintTop_toBottomOf="@+id/txtTitle" />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cvLike"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="7dp"
+        android:layout_marginTop="10dp"
+        facebook:layout_constraintStart_toStartOf="parent"
+        facebook:layout_constraintTop_toBottomOf="@id/vdPost">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/imgLike"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/iconlike" />
+
+            <TextView
+                android:id="@+id/txtCountLike"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:text="20"
+                android:textSize="@dimen/com_facebook_likeboxcountview_text_size" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <TextView
+        android:id="@+id/txtComment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="7dp"
+        android:text="41 comments"
+        android:textSize="@dimen/com_facebook_likeboxcountview_text_size"
+        facebook:layout_constraintEnd_toEndOf="parent"
+
+        facebook:layout_constraintTop_toBottomOf="@+id/vdPost" />
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        facebook:layout_constraintStart_toStartOf="parent"
+        facebook:layout_constraintTop_toBottomOf="@id/cvLike"
+        android:weightSum="2"
+        android:layout_marginTop="15dp"
+        android:orientation="horizontal"
+        >
+        <androidx.cardview.widget.CardView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+            <ToggleButton
+                android:id="@+id/tgLike"
+                android:layout_width="25dp"
+                android:src="@drawable/ic_baseline_favorite_border_24"
+                android:layout_height="25dp"
+                android:layout_gravity="center_horizontal|center_vertical"
+                android:textOff=""
+                android:textOn=""
+                />
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+        <ImageView
+            android:id="@+id/btnComment"
+            android:layout_width="25dp"
+            android:src="@drawable/ic_baseline_mode_comment_24"
+            android:layout_gravity="center_horizontal|center_vertical"
+            android:layout_height="25dp"
+            />
+        </androidx.cardview.widget.CardView>
+
+    </LinearLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

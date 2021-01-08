@@ -1,0 +1,22 @@
+package com.son.newsfeedfb.di
+
+import android.app.Activity
+import com.son.newsfeedfb.MainActivity
+import com.son.newsfeedfb.PostFragment
+import com.son.newsfeedfb.RegisterUser
+import com.son.newsfeedfb.ViewModel.AuthViewModel
+import com.son.newsfeedfb.ViewModel.CommentViewModel
+import com.son.newsfeedfb.ViewModel.GetListPostViewModel
+import dagger.Component
+import javax.inject.Singleton
+
+@Singleton
+@Component(modules = [FireBaseModule::class])
+interface ClientComponent {
+    fun inject(activity: MainActivity)
+    fun inject(fragment: PostFragment)
+    fun inject(activity: RegisterUser)
+    fun inject(authViewModel: AuthViewModel)
+    fun inject(getListPostViewModel: GetListPostViewModel)
+    fun inject(commentViewModel: CommentViewModel)
+}

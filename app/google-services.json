@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "554978999156",
+    "project_id": "newsfeedfb-777b1",
+    "storage_bucket": "newsfeedfb-777b1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:554978999156:android:7bef71586a3ebd4caa0a21",
+        "android_client_info": {
+          "package_name": "com.son.newsfeedfb"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "554978999156-hs4lkg9s96k88mtd68kplhjqitfu4dhi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDK_fYlioZKmzktR1ut1Kpy01Hh1_K9s5I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "554978999156-hs4lkg9s96k88mtd68kplhjqitfu4dhi.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
