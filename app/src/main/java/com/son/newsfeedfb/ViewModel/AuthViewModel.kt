@@ -19,7 +19,7 @@ import com.son.newsfeedfb.di.DaggerClientComponent
 import kotlinx.android.synthetic.main.activity_register_user.*
 import javax.inject.Inject
 
-class AuthViewModel(var idParent: IdParent) {
+class AuthViewModel() {
     @Inject
     lateinit var firebaseAuth: FirebaseAuth
     var resultAuth = MutableLiveData<String>("error")
@@ -33,7 +33,7 @@ class AuthViewModel(var idParent: IdParent) {
     @Inject
     lateinit var post: Post
     lateinit var id:String
-    var admin = Admin()
+    var admin = Admin
 
     init {
         DaggerClientComponent.builder().build().inject(this)
@@ -44,6 +44,7 @@ class AuthViewModel(var idParent: IdParent) {
             this.firebaseAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(Activity(), OnCompleteListener<AuthResult> { task ->
                     if (task.isSuccessful) {
+//                        admin.nameAmdin = email
                         databaseReference.orderByChild("authorID").equalTo(email.replace(".", "-"))
                             .addValueEventListener(object : ValueEventListener {
                                 override fun onCancelled(error: DatabaseError) {
@@ -55,7 +56,8 @@ class AuthViewModel(var idParent: IdParent) {
                                     snapshot.children.forEach {
                                         Log.e("Tag", "parent: ${it.key}")
                                         id = it.key.toString()
-                                        idParent.idResult(it.key.toString())
+                                        admin.getId().idChild = it.key.toString()
+//                                            admin.idChild = it.key.toString()
                                     }
                                 }
 
@@ -75,13 +77,13 @@ class AuthViewModel(var idParent: IdParent) {
         login(email, password)
         return resultAuth
     }
-    interface IdParent{
-        fun idResult( id:String)
-    }
 
     fun getResultRegister(email: String, password: String, name: String): LiveData<String> {
         registerUser(email, password, name)
         return resultAuth
+    }
+    fun logOut(){
+        firebaseAuth.signOut()
     }
 
     fun registerUser(email: String, password: String, name: String) {

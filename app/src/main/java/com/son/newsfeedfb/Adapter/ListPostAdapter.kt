@@ -154,7 +154,7 @@ class ListPostAdapter(var context: Context?, var userList: ArrayList<Post>, var 
             }
 
             cvComment.setOnClickListener(View.OnClickListener {
-                callback.onClickItem(userList[position].comment)
+                callback.onClickItem(userList[position].comment,userList[position].id)
 
             })
         }
@@ -285,7 +285,7 @@ class ListPostAdapter(var context: Context?, var userList: ArrayList<Post>, var 
         notifyDataSetChanged()
     }
     interface Callback{
-        fun onClickItem(list : ArrayList<Comment>
+        fun onClickItem(list : ArrayList<Comment>, refChild : String
         )
     }
 

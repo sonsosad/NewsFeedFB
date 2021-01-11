@@ -1,33 +1,28 @@
 package com.son.newsfeedfb
 
-import android.content.Context
 import android.graphics.Point
 import android.os.Bundle
 import android.view.*
 import android.widget.PopupWindow
+import android.widget.Toast
 import androidx.core.content.ContextCompat.getDrawable
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.son.newsfeedfb.Adapter.CommentApdater
 import com.son.newsfeedfb.Adapter.ListPostAdapter
 import com.son.newsfeedfb.Model.Comment
 import com.son.newsfeedfb.Model.Post
+import com.son.newsfeedfb.ViewModel.AuthViewModel
 import com.son.newsfeedfb.ViewModel.GetListPostViewModel
-import kotlinx.android.synthetic.main.cmt_popup_layout.*
-import kotlinx.android.synthetic.main.cmt_popup_layout.view.*
 import kotlinx.android.synthetic.main.post_fragment.view.*
 
 class PostFragment : Fragment(), ListPostAdapter.Callback {
     lateinit var getListPostViewModel: GetListPostViewModel
     lateinit var listPostAdapter: ListPostAdapter
-    lateinit var commentApdater:CommentApdater
     private lateinit var popupWindow: PopupWindow
+    var authViewModel = AuthViewModel()
     var userList: ArrayList<Post> = ArrayList()
-    var commentList: ArrayList<Comment> = ArrayList()
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -35,6 +30,28 @@ class PostFragment : Fragment(), ListPostAdapter.Callback {
     ): View? {
         val view: View = inflater.inflate(R.layout.post_fragment, container, false)
         return view
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.main_menu, menu)
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_settings -> {
+                authViewModel.logOut()
+                Toast.makeText(context, "Logout is success", Toast.LENGTH_LONG).show()
+                activity?.finish()
+                true
+            }
+            else -> false
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -50,10 +67,10 @@ class PostFragment : Fragment(), ListPostAdapter.Callback {
 
     }
 
-    override fun onClickItem(list: ArrayList<Comment>) {
-        val commentDialog = CommentDialog(list)
-        val fm : FragmentManager = this.childFragmentManager
-        commentDialog.show(fm,null)
+    override fun onClickItem(list: ArrayList<Comment>, refChild: String) {
+        val commentDialog = CommentDialog(list, refChild)
+        val fm: FragmentManager = this.childFragmentManager
+        commentDialog.show(fm, null)
     }
 
     fun popUp(list: ArrayList<Comment>) {
@@ -62,7 +79,7 @@ class PostFragment : Fragment(), ListPostAdapter.Callback {
         val size: Point = Point()
         display.getSize(size)
         popupWindow = PopupWindow(inflateview, size.x - 50, size.y - 400, true)
-        popupWindow.setBackgroundDrawable(context?.let { getDrawable(it,R.drawable.fb_popup_bg) })
+        popupWindow.setBackgroundDrawable(context?.let { getDrawable(it, R.drawable.fb_popup_bg) })
         popupWindow.isFocusable = true
         popupWindow.isOutsideTouchable = true
         popupWindow.showAtLocation(view, Gravity.BOTTOM, 0, 100)

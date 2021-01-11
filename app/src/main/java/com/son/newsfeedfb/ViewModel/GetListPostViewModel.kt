@@ -14,6 +14,7 @@ class GetListPostViewModel : ViewModel() {
     @Inject
      lateinit var databaseReference: DatabaseReference
      var list : ArrayList<Post> = ArrayList()
+    var post  = Post()
      var usersList = MutableLiveData<ArrayList<Post>>()
     init {
         DaggerClientComponent.builder().build().inject(this)
@@ -32,7 +33,8 @@ class GetListPostViewModel : ViewModel() {
             override fun onDataChange(snapshot: DataSnapshot) {
 
                 snapshot.children.forEach{
-                    list.add(it.getValue(Post::class.java)!!)
+                    post = it.getValue(Post::class.java)!!
+                    list.add(post)
                 }
                 usersList.postValue(list)
             }

@@ -17,7 +17,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_register_user.*
 import kotlinx.android.synthetic.main.activity_register_user.btnRegister
 
-class RegisterUser : AppCompatActivity(),AuthViewModel.IdParent {
+class RegisterUser : AppCompatActivity() {
     lateinit var authViewModel: AuthViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,7 +26,7 @@ class RegisterUser : AppCompatActivity(),AuthViewModel.IdParent {
             var email = userName.text.toString()
             var password = edtPassword.text.toString()
             var name = edtName.text.toString()
-            authViewModel = AuthViewModel(this)
+            authViewModel = AuthViewModel()
             authViewModel.registerUser(email, password, name)
             authViewModel.getResultRegister(email, password, name).observe(this, Observer {
                 if (it == "successful") {
@@ -37,7 +37,4 @@ class RegisterUser : AppCompatActivity(),AuthViewModel.IdParent {
         })
     }
 
-    override fun idResult(id: String) {
-
-    }
 }
