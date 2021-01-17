@@ -15,7 +15,7 @@
         android:layout_alignParentTop="true"
         android:layout_margin="7dp"
         facebook:layout_constraintStart_toStartOf="parent"
-        facebook:layout_constraintTop_toTopOf="parent"></de.hdodenhof.circleimageview.CircleImageView>
+        facebook:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/txtName"
@@ -57,6 +57,7 @@
         android:layout_alignParentTop="true"
         android:layout_margin="7dp"
         app:useDefaultControls="true"
+        facebook:use_controller="false"
         facebook:layout_constraintStart_toStartOf="parent"
         facebook:layout_constraintTop_toBottomOf="@+id/txtTitle" />
 
@@ -130,6 +131,7 @@
         </androidx.cardview.widget.CardView>
 
         <androidx.cardview.widget.CardView
+            android:id="@+id/cvComment"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1">

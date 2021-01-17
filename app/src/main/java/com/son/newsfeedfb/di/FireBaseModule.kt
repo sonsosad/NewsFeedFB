@@ -13,25 +13,30 @@ import javax.inject.Singleton
 class FireBaseModule {
     @Singleton
     @Provides
-        fun provideDatabase(): FirebaseDatabase{
+    fun provideDatabase(): FirebaseDatabase {
         return FirebaseDatabase.getInstance()
     }
+
     @Singleton
     @Provides
-    fun provideAuth(): FirebaseAuth{
+    fun provideAuth(): FirebaseAuth {
         return FirebaseAuth.getInstance()
     }
+
     @Singleton
     @Provides
-    fun provideDataRef(): DatabaseReference{
+    fun provideDataRef(): DatabaseReference {
         return FirebaseDatabase.getInstance().getReference("Post")
     }
+
     @Provides
-    fun provideComment(): Comment{
+    fun provideComment(): Comment {
         return Comment()
     }
+
     @Provides
-    fun providePost(): Post{
-        return  Post()
+    fun providePost(): Post {
+        return Post()
+
     }
 }

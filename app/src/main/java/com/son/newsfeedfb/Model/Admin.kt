@@ -4,6 +4,7 @@ class Admin {
          lateinit var idChild: String
          lateinit var nameAmdin: String
         lateinit var avatarAdmin: String
+        lateinit var tokenId : String
 
     companion object{
         lateinit var admin: Admin

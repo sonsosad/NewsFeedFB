@@ -9,6 +9,7 @@ class   Post {
     lateinit var title : String
     lateinit var content : String
     lateinit var createAt : String
+    lateinit var token: String
      var like: Int = 20
     lateinit var comment: ArrayList<Comment>
 

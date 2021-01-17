@@ -1,5 +1,4 @@
 package com.son.newsfeedfb
-
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 class TimeLine : AppCompatActivity() {
@@ -11,8 +10,11 @@ class TimeLine : AppCompatActivity() {
             supportFragmentManager
                 .beginTransaction()
                 .replace(R.id.fg_TimeLine, fragment)
-                .commit()
+                .commitNow()
         }
+    }
 
+    override fun onBackPressed() {
+        super.finish()
     }
 }

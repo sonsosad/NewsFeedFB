@@ -1,9 +1,7 @@
 package com.son.newsfeedfb
-
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.lifecycle.Observer
 import com.son.newsfeedfb.ViewModel.AuthViewModel
@@ -17,11 +15,11 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         btnLogin.setOnClickListener(View.OnClickListener {
-            var email = userName.text.toString()
-            var password = edtPassword.text.toString()
+            val email = userName.text.toString()
+            val password = edtPassword.text.toString()
             authViewModel = AuthViewModel()
-            authViewModel.login(email, password)
-            authViewModel.getResultAuth(email, password).observe(this, Observer {
+            authViewModel.login(email, password,this )
+            authViewModel.getResultAuth(email, password,this).observe(this, Observer {
                 if (it == "successful") {
                     startActivity(Intent(this, TimeLine::class.java))
 

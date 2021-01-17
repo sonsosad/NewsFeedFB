@@ -28,8 +28,7 @@ class PostFragment : Fragment(), ListPostAdapter.Callback {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view: View = inflater.inflate(R.layout.post_fragment, container, false)
-        return view
+        return inflater.inflate(R.layout.post_fragment, container, false)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,7 +46,8 @@ class PostFragment : Fragment(), ListPostAdapter.Callback {
             R.id.action_settings -> {
                 authViewModel.logOut()
                 Toast.makeText(context, "Logout is success", Toast.LENGTH_LONG).show()
-                activity?.finish()
+//                (activity as TimeLine).finish()
+                (activity as TimeLine).finish()
                 true
             }
             else -> false
@@ -60,6 +60,7 @@ class PostFragment : Fragment(), ListPostAdapter.Callback {
         rvPost.layoutManager = LinearLayoutManager(this.context)
         listPostAdapter = ListPostAdapter(this.context, userList, this)
         rvPost.adapter = listPostAdapter
+        rvPost.setHasFixedSize(true)
         getListPostViewModel = GetListPostViewModel()
         getListPostViewModel.getUsersList().observe(viewLifecycleOwner, Observer {
             listPostAdapter.updateData(it)
@@ -67,8 +68,8 @@ class PostFragment : Fragment(), ListPostAdapter.Callback {
 
     }
 
-    override fun onClickItem(list: ArrayList<Comment>, refChild: String) {
-        val commentDialog = CommentDialog(list, refChild)
+    override fun onClickItem(list: ArrayList<Comment>, refChild: String, name: String,token : String) {
+        val commentDialog = CommentDialog(list, refChild, name,token)
         val fm: FragmentManager = this.childFragmentManager
         commentDialog.show(fm, null)
     }

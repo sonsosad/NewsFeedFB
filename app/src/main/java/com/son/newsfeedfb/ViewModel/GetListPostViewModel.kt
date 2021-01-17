@@ -1,12 +1,12 @@
 package com.son.newsfeedfb.ViewModel
-
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.database.*
-import com.son.newsfeedfb.Model.Comment
 import com.son.newsfeedfb.Model.Post
+import com.son.newsfeedfb.MyApplication
+import com.son.newsfeedfb.di.ClientComponent
 import com.son.newsfeedfb.di.DaggerClientComponent
 import javax.inject.Inject
 
@@ -17,7 +17,9 @@ class GetListPostViewModel : ViewModel() {
     var post  = Post()
      var usersList = MutableLiveData<ArrayList<Post>>()
     init {
-        DaggerClientComponent.builder().build().inject(this)
+//        DaggerClientComponent.builder().build().inject(this)
+        var clientComponent : ClientComponent = MyApplication.clientComponent
+        clientComponent.inject(this)
     }
     fun getUsersList(): LiveData<ArrayList<Post>> {
         getDataFireBase()

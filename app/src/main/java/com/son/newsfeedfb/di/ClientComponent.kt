@@ -1,6 +1,4 @@
 package com.son.newsfeedfb.di
-
-import android.app.Activity
 import com.son.newsfeedfb.MainActivity
 import com.son.newsfeedfb.PostFragment
 import com.son.newsfeedfb.RegisterUser
@@ -11,7 +9,7 @@ import dagger.Component
 import javax.inject.Singleton
 
 @Singleton
-@Component(modules = [FireBaseModule::class])
+@Component(modules = [FireBaseModule::class,RetrofitModule::class])
 interface ClientComponent {
     fun inject(activity: MainActivity)
     fun inject(fragment: PostFragment)

@@ -1,5 +1,6 @@
 package com.son.newsfeedfb.Adapter
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
 import android.util.Log
@@ -11,26 +12,35 @@ import android.widget.TextView
 import android.widget.ToggleButton
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.cardview.widget.CardView
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.devbrackets.android.exomedia.core.listener.ExoPlayerListener
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.ui.PlayerView
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
+import com.son.newsfeedfb.Model.Admin
 import com.son.newsfeedfb.Model.Comment
 import com.son.newsfeedfb.Model.Post
 import com.son.newsfeedfb.PostFragment
 import com.son.newsfeedfb.R
+import com.son.newsfeedfb.ViewModel.CommentViewModel
 import com.son.newsfeedfb.ViewModel.GetListPostViewModel
 import kotlinx.android.synthetic.main.item_video.view.*
 import kotlinx.android.synthetic.main.item_video.view.txtCreateAt
 
-class ListPostAdapter(var context: Context?, var userList: ArrayList<Post>, var callback: Callback) :
+class ListPostAdapter(
+    var context: Context?,
+    var userList: ArrayList<Post>,
+    var callback: Callback
+) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    internal val VIEW_TYPE_ONE = 1
-    internal val VIEW_TYPE_TWO = 2
-    internal val VIEW_TYPE_THREE = 3
+    private val VIEW_TYPE_ONE = 1
+    private val VIEW_TYPE_TWO = 2
+    private val VIEW_TYPE_THREE = 3
     lateinit var getListPostViewModel: GetListPostViewModel
 
     class ContentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -41,6 +51,10 @@ class ListPostAdapter(var context: Context?, var userList: ArrayList<Post>, var 
         var txtCountLike: TextView
         var txtComment: TextView
         var tgLike: ToggleButton
+        var cvComment: CardView
+        var getListPostViewModel: GetListPostViewModel
+        var commentViewModel: CommentViewModel
+        var admin = Admin
 
         init {
             imgAvatar = itemView.findViewById(R.id.imgAvatar)
@@ -50,10 +64,19 @@ class ListPostAdapter(var context: Context?, var userList: ArrayList<Post>, var 
             txtCountLike = itemView.findViewById(R.id.txtCountLike)
             txtComment = itemView.findViewById(R.id.txtComment)
             tgLike = itemView.findViewById(R.id.tgLike)
-
+            cvComment = itemView.findViewById(R.id.cvComment)
+            getListPostViewModel = GetListPostViewModel()
+            commentViewModel = CommentViewModel()
+            commentViewModel.getObjectCurrent()
         }
 
-        internal fun bind(userList: List<Post>, position: Int, context: Context?) {
+        internal fun bind(
+            userList: List<Post>,
+            position: Int,
+            context: Context?,
+            callback: Callback
+        ) {
+            Log.e("Tag","list realtime ${userList[position].comment.size}")
             txtName.text = userList[position].name
             txtCreateAt.text = userList[position].createAt
             txtContent.text = userList[position].content
@@ -65,21 +88,50 @@ class ListPostAdapter(var context: Context?, var userList: ArrayList<Post>, var 
             }
             tgLike.isChecked = false
             tgLike.background =
-                context?.let { getDrawable(it,
-                    R.drawable.ic_baseline_favorite_border_24
-                ) }
+                context?.let {
+                    getDrawable(
+                        it,
+                        R.drawable.ic_baseline_favorite_border_24
+                    )
+                }
             tgLike.setOnCheckedChangeListener { _, b ->
                 if (b) {
                     tgLike.background =
-                        context?.let { getDrawable(it,
-                            R.drawable.ic_baseline_favorite_24
-                        ) }
+                        context?.let {
+                            getDrawable(
+                                it,
+                                R.drawable.ic_baseline_favorite_24
+                            )
+                        }
+                    userList[position].like += 2
+                    txtCountLike.text = userList[position].like.toString()
+                    getListPostViewModel.getLike(userList[position].id, userList[position].like)
+                    commentViewModel.sendNotification(
+                        userList[position].token,
+                        "Thông báo Like",
+                        "${admin.getId().nameAmdin} đã thích bài của ${userList[position].name}"
+                    )
                 } else
                     tgLike.background =
-                        context?.let { getDrawable(it,
-                            R.drawable.ic_baseline_favorite_border_24
-                        ) }
+                        context?.let {
+                            getDrawable(
+                                it,
+                                R.drawable.ic_baseline_favorite_border_24
+                            )
+                        }
+                userList[position].like -= 1
+                txtCountLike.text = userList[position].like.toString()
+                getListPostViewModel.getLike(userList[position].id, userList[position].like)
+                Log.e("Tag", "cl2" + userList[position].like.toString())
             }
+            cvComment.setOnClickListener(View.OnClickListener {
+                callback.onClickItem(
+                    userList[position].comment,
+                    userList[position].id,
+                    userList[position].name,
+                    userList[position].token
+                )
+            })
         }
     }
 
@@ -92,8 +144,10 @@ class ListPostAdapter(var context: Context?, var userList: ArrayList<Post>, var 
         var txtComment: TextView
         var txtTitle: TextView
         var tgLike: ToggleButton
-        var cvComment : CardView
+        var cvComment: CardView
         var getListPostViewModel: GetListPostViewModel
+        var commentViewModel: CommentViewModel
+        var admin = Admin
 
         init {
             imgAvatar = itemView.findViewById(R.id.imgAvatar)
@@ -106,8 +160,12 @@ class ListPostAdapter(var context: Context?, var userList: ArrayList<Post>, var 
             tgLike = itemView.findViewById(R.id.tgLike)
             cvComment = itemView.findViewById(R.id.cvComment)
             getListPostViewModel = GetListPostViewModel()
+            commentViewModel = CommentViewModel()
+            commentViewModel.getObjectCurrent()
+
         }
 
+        @SuppressLint("SetTextI18n")
         internal fun bind(
             userList: List<Post>,
             position: Int,
@@ -118,8 +176,8 @@ class ListPostAdapter(var context: Context?, var userList: ArrayList<Post>, var 
             txtCreateAt.text = userList[position].createAt
             txtCountLike.text = userList[position].like.toString()
             txtTitle.text = userList[position].title
-            txtComment.text =
-                userList[position].comment.size.toString() + " comments"
+            txtComment.text ="${userList[position].comment.size} +  comments"
+
             if (context != null) {
                 Glide.with(context).load(userList[position].avatar).into(imgAvatar)
             }
@@ -128,34 +186,50 @@ class ListPostAdapter(var context: Context?, var userList: ArrayList<Post>, var 
             }
             tgLike.isChecked = false
             tgLike.background =
-                context?.let { getDrawable(it,
-                    R.drawable.ic_baseline_favorite_border_24
-                ) }
-            tgLike.setOnCheckedChangeListener { compoundButton, b ->
+                context?.let {
+                    getDrawable(
+                        it,
+                        R.drawable.ic_baseline_favorite_border_24
+                    )
+                }
+            tgLike.setOnCheckedChangeListener { _, b ->
                 if (b) {
                     tgLike.background =
-                        context?.let { getDrawable(it,
-                            R.drawable.ic_baseline_favorite_24
-                        ) }
+                        context?.let {
+                            getDrawable(
+                                it,
+                                R.drawable.ic_baseline_favorite_24
+                            )
+                        }
                     userList[position].like += 2
                     txtCountLike.text = userList[position].like.toString()
-                    getListPostViewModel.getLike(userList[position].id,userList[position].like)
-                    Log.e("Tag", "cl" + userList[position].like.toString())
+                    getListPostViewModel.getLike(userList[position].id, userList[position].like)
+                    commentViewModel.sendNotification(
+                        userList[position].token,
+                        "Thông báo Like",
+                        "${admin.getId().nameAmdin} đã thích bài của ${userList[position].name}"
+                    )
                 } else
                     tgLike.background = context?.let {
-                        getDrawable(it,
+                        getDrawable(
+                            it,
                             R.drawable.ic_baseline_favorite_border_24
                         )
                     }
                 userList[position].like -= 1
                 txtCountLike.text = userList[position].like.toString()
-                getListPostViewModel.getLike(userList[position].id,userList[position].like)
+                getListPostViewModel.getLike(userList[position].id, userList[position].like)
                 Log.e("Tag", "cl2" + userList[position].like.toString())
             }
 
             cvComment.setOnClickListener(View.OnClickListener {
-                callback.onClickItem(userList[position].comment,userList[position].id)
-
+                callback.onClickItem(
+                    userList[position].comment,
+                            userList[position].id,
+                    userList[position].name,
+                    userList[position].token
+                )
+                txtComment.text ="${userList[position].comment.size}  comments"
             })
         }
     }
@@ -170,6 +244,10 @@ class ListPostAdapter(var context: Context?, var userList: ArrayList<Post>, var 
         var txtTitle: TextView
         var tgLike: ToggleButton
         var player: SimpleExoPlayer? = null
+        private var getListPostViewModel: GetListPostViewModel
+        var cvComment: CardView
+        var admin = Admin
+        var commentViewModel: CommentViewModel
 
         init {
             imgAvatar = itemView.findViewById(R.id.imgAvatar)
@@ -180,13 +258,18 @@ class ListPostAdapter(var context: Context?, var userList: ArrayList<Post>, var 
             txtComment = itemView.findViewById(R.id.txtComment)
             txtTitle = itemView.findViewById(R.id.txtTitle)
             tgLike = itemView.findViewById(R.id.tgLike)
+            getListPostViewModel = GetListPostViewModel()
+            cvComment = itemView.findViewById(R.id.cvComment)
+            commentViewModel = CommentViewModel()
+            commentViewModel.getObjectCurrent()
         }
 
         internal fun bind(
             userList: List<Post>,
             position: Int,
             context: Context?,
-            holder: RecyclerView.ViewHolder
+            holder: RecyclerView.ViewHolder,
+            callback: Callback
         ) {
             txtName.text = userList[position].name
             txtCreateAt.text = userList[position].createAt
@@ -199,34 +282,66 @@ class ListPostAdapter(var context: Context?, var userList: ArrayList<Post>, var 
             }
             holder.itemView.apply {
                 player = ExoPlayerFactory.newSimpleInstance(this.context, DefaultTrackSelector())
-                var defaultDataSourceFactory = DefaultDataSourceFactory(
+                val defaultDataSourceFactory = DefaultDataSourceFactory(
                     this.context,
                     com.google.android.exoplayer2.util.Util.getUserAgent(this.context, "newfeedd")
                 )
-                var dataSource = ProgressiveMediaSource.Factory(defaultDataSourceFactory)
+                val dataSource = ProgressiveMediaSource.Factory(defaultDataSourceFactory)
                     .createMediaSource(Uri.parse(userList[position].content))
-                player!!.prepare(dataSource)
                 player!!.playWhenReady = true
                 vdPost.player = player
                 vdPost.requestFocus()
+                player!!.prepare(dataSource)
+                if (player!!.playbackState == Player.STATE_READY){
+                    player!!.play()
+                }
             }
             tgLike.isChecked = false
             tgLike.background =
-                context?.let { getDrawable(it,
-                    R.drawable.ic_baseline_favorite_border_24
-                ) }
+                context?.let {
+                    getDrawable(
+                        it,
+                        R.drawable.ic_baseline_favorite_border_24
+                    )
+                }
             tgLike.setOnCheckedChangeListener { _, b ->
                 if (b) {
                     tgLike.background =
-                        context?.let { getDrawable(it,
-                            R.drawable.ic_baseline_favorite_24
-                        ) }
+                        context?.let {
+                            getDrawable(
+                                it,
+                                R.drawable.ic_baseline_favorite_24
+                            )
+                        }
+                    userList[position].like += 2
+                    txtCountLike.text = userList[position].like.toString()
+                    getListPostViewModel.getLike(userList[position].id, userList[position].like)
+                    commentViewModel.sendNotification(
+                        userList[position].token,
+                        "Thông báo Like",
+                        "${admin.getId().nameAmdin} đã thích bài của ${userList[position].name}"
+                    )
                 } else
                     tgLike.background =
-                        context?.let { getDrawable(it,
-                            R.drawable.ic_baseline_favorite_border_24
-                        ) }
+                        context?.let {
+                            getDrawable(
+                                it,
+                                R.drawable.ic_baseline_favorite_border_24
+                            )
+                        }
+                userList[position].like -= 1
+                txtCountLike.text = userList[position].like.toString()
+                getListPostViewModel.getLike(userList[position].id, userList[position].like)
             }
+            cvComment.setOnClickListener(View.OnClickListener {
+                callback.onClickItem(
+                    userList[position].comment,
+                    userList[position].id,
+                    userList[position].name,
+                    userList[position].token
+                )
+
+            })
 
         }
     }
@@ -266,9 +381,19 @@ class ListPostAdapter(var context: Context?, var userList: ArrayList<Post>, var 
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
-            is ContentViewHolder -> (holder as ContentViewHolder).bind(userList, position, context)
-            is ImageViewHolder -> (holder as ImageViewHolder).bind(userList, position, context,callback)
-            else -> (holder as VideoViewHolder).bind(userList, position, context, holder)
+            is ContentViewHolder -> (holder as ContentViewHolder).bind(
+                userList,
+                position,
+                context,
+                callback
+            )
+            is ImageViewHolder -> (holder as ImageViewHolder).bind(
+                userList,
+                position,
+                context,
+                callback
+            )
+            else -> (holder as VideoViewHolder).bind(userList, position, context, holder, callback)
         }
     }
 
@@ -284,13 +409,11 @@ class ListPostAdapter(var context: Context?, var userList: ArrayList<Post>, var 
         this.userList = list
         notifyDataSetChanged()
     }
-    interface Callback{
-        fun onClickItem(list : ArrayList<Comment>, refChild : String
-        )
-    }
 
-    fun nofti(position: Int) {
-        notifyItemChanged(position)
+    interface Callback {
+        fun onClickItem(
+            list: ArrayList<Comment>, refChild: String, name: String,token : String
+        )
     }
 
 

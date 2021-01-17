@@ -1,6 +1,7 @@
 package com.son.newsfeedfb.ViewModel
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.util.Log
 import android.widget.Toast
@@ -11,10 +12,15 @@ import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import com.google.firebase.messaging.FirebaseMessaging
+import com.son.newsfeedfb.MainActivity
 import com.son.newsfeedfb.Model.Admin
 import com.son.newsfeedfb.Model.Comment
 import com.son.newsfeedfb.Model.Post
+import com.son.newsfeedfb.MyApplication
+import com.son.newsfeedfb.RegisterUser
 import com.son.newsfeedfb.TimeLine
+import com.son.newsfeedfb.di.ClientComponent
 import com.son.newsfeedfb.di.DaggerClientComponent
 import kotlinx.android.synthetic.main.activity_register_user.*
 import javax.inject.Inject
@@ -32,19 +38,22 @@ class AuthViewModel() {
 
     @Inject
     lateinit var post: Post
-    lateinit var id:String
+    lateinit var id: String
     var admin = Admin
+    var flag: Boolean = true
 
     init {
-        DaggerClientComponent.builder().build().inject(this)
+        var clientComponent: ClientComponent = MyApplication.clientComponent
+        clientComponent.inject(this)
     }
 
-    fun login(email: String, password: String) {
-        if (!email.isEmpty() && !password.isEmpty()) {
-            this.firebaseAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(Activity(), OnCompleteListener<AuthResult> { task ->
-                    if (task.isSuccessful) {
-//                        admin.nameAmdin = email
+    fun login(email: String, password: String,activity: MainActivity) {
+        flag = true
+        if (email.isNotEmpty() && password.isNotEmpty()) {
+            firebaseAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(activity, OnCompleteListener<AuthResult> { task ->
+                    if (task.isSuccessful&&flag) {
+                        flag =false
                         databaseReference.orderByChild("authorID").equalTo(email.replace(".", "-"))
                             .addValueEventListener(object : ValueEventListener {
                                 override fun onCancelled(error: DatabaseError) {
@@ -57,7 +66,6 @@ class AuthViewModel() {
                                         Log.e("Tag", "parent: ${it.key}")
                                         id = it.key.toString()
                                         admin.getId().idChild = it.key.toString()
-//                                            admin.idChild = it.key.toString()
                                     }
                                 }
 
@@ -73,28 +81,34 @@ class AuthViewModel() {
         }
     }
 
-    fun getResultAuth(email: String, password: String): LiveData<String> {
-        login(email, password)
+    fun getResultAuth(email: String, password: String,activity: MainActivity): LiveData<String> {
+        login(email, password,activity)
         return resultAuth
     }
 
-    fun getResultRegister(email: String, password: String, name: String): LiveData<String> {
-        registerUser(email, password, name)
+    fun getResultRegister(email: String, password: String, name: String,activity: RegisterUser): LiveData<String> {
+        registerUser(email, password, name,activity)
         return resultAuth
     }
-    fun logOut(){
+
+    fun logOut() {
         firebaseAuth.signOut()
     }
 
-    fun registerUser(email: String, password: String, name: String) {
-        if (!email.isEmpty() && !password.isEmpty() && !name.isEmpty()) {
+    fun registerUser(email: String, password: String, name: String, activity: RegisterUser) {
+        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener {
+            Log.e("Tag", "tokennn ${it.result.toString()}")
+            post.token = it.result.toString()
+        })
+        if (email.isNotEmpty() && password.isNotEmpty() && name.isNotEmpty()) {
             firebaseAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(Activity(), OnCompleteListener { task ->
+                .addOnCompleteListener(activity, OnCompleteListener { task ->
                     if (task.isSuccessful) {
                         val user = firebaseAuth.currentUser
                         val uid = databaseReference.push().key
+                        admin.getId().idChild = uid.toString()
                         if (uid != null) {
-                            var comment = ArrayList<Comment>()
+                            val comment = ArrayList<Comment>()
                             comment.add(
                                 Comment(
                                     "I love U 3000",
@@ -119,12 +133,13 @@ class AuthViewModel() {
                             post.authorID = user?.email?.replace(".", "-").toString()
                             post.name = name
                             post.like = 47
-                            post.viewType = 3
+                            post.viewType = 2
                             post.title = "ABCXYZ"
-                            post.content = "https://www.youtube.com/watch?v=OPBjYZPWn_c"
+                            post.content = "https://i.postimg.cc/nz3jFn1N/khabanh.jpg"
+                            post.id = uid.toString()
                             post.avatar =
                                 "https://i.pinimg.com/originals/62/19/87/6219878a5bee02e840796a354beb2fff.png"
-                            post.createAt = "11-05-2017"
+                            post.createAt = "18-05-2020"
                             post.comment = comment
                             databaseReference.child(uid).setValue(post)
 
