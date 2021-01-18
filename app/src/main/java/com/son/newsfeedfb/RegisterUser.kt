@@ -22,7 +22,7 @@ class RegisterUser : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register_user)
-        btnRegister.setOnClickListener(View.OnClickListener { view ->
+        btnRegister.setOnClickListener(View.OnClickListener {
             val email = edtEmailRegister.text.toString()
             val password = edtPasswordRegister.text.toString()
             val name = edtName.text.toString()

@@ -1,11 +1,5 @@
 package com.son.newsfeedfb.ViewModel
-
-import android.app.Activity
-import android.content.Context
-import android.content.Intent
 import android.util.Log
-import android.widget.Toast
-import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.tasks.OnCompleteListener
@@ -19,10 +13,7 @@ import com.son.newsfeedfb.Model.Comment
 import com.son.newsfeedfb.Model.Post
 import com.son.newsfeedfb.MyApplication
 import com.son.newsfeedfb.RegisterUser
-import com.son.newsfeedfb.TimeLine
 import com.son.newsfeedfb.di.ClientComponent
-import com.son.newsfeedfb.di.DaggerClientComponent
-import kotlinx.android.synthetic.main.activity_register_user.*
 import javax.inject.Inject
 
 class AuthViewModel() {
@@ -41,10 +32,15 @@ class AuthViewModel() {
     lateinit var id: String
     var admin = Admin
     var flag: Boolean = true
+    lateinit var tokenId : String
 
     init {
         var clientComponent: ClientComponent = MyApplication.clientComponent
         clientComponent.inject(this)
+        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener {
+            Log.e("Tag", "tokennn ${it.result.toString()}")
+            tokenId = it.result.toString()
+        })
     }
 
     fun login(email: String, password: String,activity: MainActivity) {
@@ -96,14 +92,12 @@ class AuthViewModel() {
     }
 
     fun registerUser(email: String, password: String, name: String, activity: RegisterUser) {
-        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener {
-            Log.e("Tag", "tokennn ${it.result.toString()}")
-            post.token = it.result.toString()
-        })
+        flag = true
         if (email.isNotEmpty() && password.isNotEmpty() && name.isNotEmpty()) {
             firebaseAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(activity, OnCompleteListener { task ->
-                    if (task.isSuccessful) {
+                    if (task.isSuccessful&& flag) {
+                        flag = false
                         val user = firebaseAuth.currentUser
                         val uid = databaseReference.push().key
                         admin.getId().idChild = uid.toString()
@@ -133,20 +127,21 @@ class AuthViewModel() {
                             post.authorID = user?.email?.replace(".", "-").toString()
                             post.name = name
                             post.like = 47
-                            post.viewType = 2
-                            post.title = "ABCXYZ"
-                            post.content = "https://i.postimg.cc/nz3jFn1N/khabanh.jpg"
+                            post.viewType = 1
+                            post.title = "Hiii "
+                            post.content = "Chao mn"
                             post.id = uid.toString()
                             post.avatar =
                                 "https://i.pinimg.com/originals/62/19/87/6219878a5bee02e840796a354beb2fff.png"
                             post.createAt = "18-05-2020"
+                            post.token = tokenId
                             post.comment = comment
                             databaseReference.child(uid).setValue(post)
 
                         }
                         resultAuth.value = "successful"
                     } else {
-                        Log.e("Tag", "Error")
+                        Log.e("Tag", "Error register")
                     }
                 })
         } else {

@@ -176,7 +176,7 @@ class ListPostAdapter(
             txtCreateAt.text = userList[position].createAt
             txtCountLike.text = userList[position].like.toString()
             txtTitle.text = userList[position].title
-            txtComment.text ="${userList[position].comment.size} +  comments"
+            txtComment.text ="${userList[position].comment.size} comments"
 
             if (context != null) {
                 Glide.with(context).load(userList[position].avatar).into(imgAvatar)
