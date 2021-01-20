@@ -122,10 +122,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1">
-            <ToggleButton
+            <ImageView
                 android:id="@+id/tgLike"
                 android:layout_width="25dp"
-                android:src="@drawable/ic_baseline_favorite_border_24"
+                android:src="@drawable/level_favourite"
                 android:layout_height="25dp"
                 android:layout_gravity="center_horizontal|center_vertical"
                 android:textOff=""

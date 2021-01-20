@@ -1,4 +1,6 @@
 package com.son.newsfeedfb.ViewModel
+import android.content.Context
+import android.content.SharedPreferences
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -8,9 +10,10 @@ import com.son.newsfeedfb.Model.Post
 import com.son.newsfeedfb.MyApplication
 import com.son.newsfeedfb.di.ClientComponent
 import com.son.newsfeedfb.di.DaggerClientComponent
+import java.text.ParsePosition
 import javax.inject.Inject
 
-class GetListPostViewModel : ViewModel() {
+class GetListPostViewModel() : ViewModel() {
     @Inject
      lateinit var databaseReference: DatabaseReference
      var list : ArrayList<Post> = ArrayList()
@@ -20,6 +23,7 @@ class GetListPostViewModel : ViewModel() {
 //        DaggerClientComponent.builder().build().inject(this)
         var clientComponent : ClientComponent = MyApplication.clientComponent
         clientComponent.inject(this)
+
     }
     fun getUsersList(): LiveData<ArrayList<Post>> {
         getDataFireBase()
@@ -33,19 +37,17 @@ class GetListPostViewModel : ViewModel() {
             }
 
             override fun onDataChange(snapshot: DataSnapshot) {
-
                 snapshot.children.forEach{
                     post = it.getValue(Post::class.java)!!
                     list.add(post)
                 }
                 usersList.postValue(list)
             }
-
-
         })
     }
     fun getLike(refChild : String, countLike: Int){
         databaseReference = FirebaseDatabase.getInstance().getReference("Post")
         databaseReference.child(refChild).child("like").setValue(countLike)
+
     }
 }

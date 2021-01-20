@@ -14,6 +14,7 @@ import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.cardview.widget.CardView
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.devbrackets.android.exomedia.core.listener.ExoPlayerListener
@@ -35,14 +36,15 @@ import kotlinx.android.synthetic.main.item_video.view.txtCreateAt
 class ListPostAdapter(
     var context: Context?,
     var userList: ArrayList<Post>,
-    var callback: Callback
+    var callback: Callback, var player: SimpleExoPlayer
 ) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private val VIEW_TYPE_ONE = 1
     private val VIEW_TYPE_TWO = 2
     private val VIEW_TYPE_THREE = 3
-    lateinit var getListPostViewModel: GetListPostViewModel
-
+    private val listCmt = mutableListOf<Comment>()
+    private lateinit var post: Post
+    private var listComment = ArrayList<Comment>()
     class ContentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var imgAvatar: ImageView
         var txtName: TextView
@@ -50,7 +52,7 @@ class ListPostAdapter(
         var txtContent: TextView
         var txtCountLike: TextView
         var txtComment: TextView
-        var tgLike: ToggleButton
+        var tgLike: ImageView
         var cvComment: CardView
         var getListPostViewModel: GetListPostViewModel
         var commentViewModel: CommentViewModel
@@ -86,24 +88,10 @@ class ListPostAdapter(
             if (context != null) {
                 Glide.with(context).load(userList[position].avatar).into(imgAvatar)
             }
-            tgLike.isChecked = false
-            tgLike.background =
-                context?.let {
-                    getDrawable(
-                        it,
-                        R.drawable.ic_baseline_favorite_border_24
-                    )
-                }
-            tgLike.setOnCheckedChangeListener { _, b ->
-                if (b) {
-                    tgLike.background =
-                        context?.let {
-                            getDrawable(
-                                it,
-                                R.drawable.ic_baseline_favorite_24
-                            )
-                        }
-                    userList[position].like += 2
+            tgLike.setOnClickListener {
+                if (tgLike.drawable.level==0){
+                    tgLike.setImageLevel(1)
+                    userList[position].like += 1
                     txtCountLike.text = userList[position].like.toString()
                     getListPostViewModel.getLike(userList[position].id, userList[position].like)
                     commentViewModel.sendNotification(
@@ -111,25 +99,19 @@ class ListPostAdapter(
                         "Thông báo Like",
                         "${admin.getId().nameAmdin} đã thích bài của ${userList[position].name}"
                     )
-                } else
-                    tgLike.background =
-                        context?.let {
-                            getDrawable(
-                                it,
-                                R.drawable.ic_baseline_favorite_border_24
-                            )
-                        }
-                userList[position].like -= 1
-                txtCountLike.text = userList[position].like.toString()
-                getListPostViewModel.getLike(userList[position].id, userList[position].like)
-                Log.e("Tag", "cl2" + userList[position].like.toString())
+                }else{
+                    tgLike.setImageLevel(0)
+                    userList[position].like -= 1
+                    txtCountLike.text = userList[position].like.toString()
+                    getListPostViewModel.getLike(userList[position].id, userList[position].like)
+                }
             }
             cvComment.setOnClickListener(View.OnClickListener {
                 callback.onClickItem(
                     userList[position].comment,
                     userList[position].id,
                     userList[position].name,
-                    userList[position].token
+                    userList[position].token,position
                 )
             })
         }
@@ -143,7 +125,7 @@ class ListPostAdapter(
         var txtCountLike: TextView
         var txtComment: TextView
         var txtTitle: TextView
-        var tgLike: ToggleButton
+        var tgLike: ImageView
         var cvComment: CardView
         var getListPostViewModel: GetListPostViewModel
         var commentViewModel: CommentViewModel
@@ -184,24 +166,10 @@ class ListPostAdapter(
             if (context != null) {
                 Glide.with(context).load(userList[position].content).into(imgPost)
             }
-            tgLike.isChecked = false
-            tgLike.background =
-                context?.let {
-                    getDrawable(
-                        it,
-                        R.drawable.ic_baseline_favorite_border_24
-                    )
-                }
-            tgLike.setOnCheckedChangeListener { _, b ->
-                if (b) {
-                    tgLike.background =
-                        context?.let {
-                            getDrawable(
-                                it,
-                                R.drawable.ic_baseline_favorite_24
-                            )
-                        }
-                    userList[position].like += 2
+            tgLike.setOnClickListener {
+                if (tgLike.drawable.level==0){
+                    tgLike.setImageLevel(1)
+                    userList[position].like += 1
                     txtCountLike.text = userList[position].like.toString()
                     getListPostViewModel.getLike(userList[position].id, userList[position].like)
                     commentViewModel.sendNotification(
@@ -209,25 +177,19 @@ class ListPostAdapter(
                         "Thông báo Like",
                         "${admin.getId().nameAmdin} đã thích bài của ${userList[position].name}"
                     )
-                } else
-                    tgLike.background = context?.let {
-                        getDrawable(
-                            it,
-                            R.drawable.ic_baseline_favorite_border_24
-                        )
-                    }
-                userList[position].like -= 1
-                txtCountLike.text = userList[position].like.toString()
-                getListPostViewModel.getLike(userList[position].id, userList[position].like)
-                Log.e("Tag", "cl2" + userList[position].like.toString())
+                }else{
+                    tgLike.setImageLevel(0)
+                    userList[position].like -= 1
+                    txtCountLike.text = userList[position].like.toString()
+                    getListPostViewModel.getLike(userList[position].id, userList[position].like)
+                }
             }
-
             cvComment.setOnClickListener(View.OnClickListener {
                 callback.onClickItem(
                     userList[position].comment,
-                            userList[position].id,
+                    userList[position].id,
                     userList[position].name,
-                    userList[position].token
+                    userList[position].token, position
                 )
                 txtComment.text ="${userList[position].comment.size}  comments"
             })
@@ -236,18 +198,17 @@ class ListPostAdapter(
 
     class VideoViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var imgAvatar: ImageView
-        var txtName: TextView
-        var txtCreateAt: TextView
-        var vdPost: PlayerView
-        var txtCountLike: TextView
-        var txtComment: TextView
-        var txtTitle: TextView
-        var tgLike: ToggleButton
-        var player: SimpleExoPlayer? = null
+        private var txtName: TextView
+        private var txtCreateAt: TextView
+        private var vdPost: PlayerView
+        private var txtCountLike: TextView
+        private var txtComment: TextView
+        private var txtTitle: TextView
+        private var tgLike: ImageView
         private var getListPostViewModel: GetListPostViewModel
-        var cvComment: CardView
+        private var cvComment: CardView
         var admin = Admin
-        var commentViewModel: CommentViewModel
+        private var commentViewModel: CommentViewModel
 
         init {
             imgAvatar = itemView.findViewById(R.id.imgAvatar)
@@ -262,15 +223,18 @@ class ListPostAdapter(
             cvComment = itemView.findViewById(R.id.cvComment)
             commentViewModel = CommentViewModel()
             commentViewModel.getObjectCurrent()
+
         }
 
-        internal fun bind(
+        fun bind(
             userList: List<Post>,
             position: Int,
             context: Context?,
             holder: RecyclerView.ViewHolder,
-            callback: Callback
+            callback: Callback,
+            player: SimpleExoPlayer
         ) {
+
             txtName.text = userList[position].name
             txtCreateAt.text = userList[position].createAt
             txtCountLike.text = userList[position].like.toString()
@@ -281,39 +245,25 @@ class ListPostAdapter(
                 Glide.with(context).load(userList[position].avatar).into(imgAvatar)
             }
             holder.itemView.apply {
-                player = ExoPlayerFactory.newSimpleInstance(this.context, DefaultTrackSelector())
                 val defaultDataSourceFactory = DefaultDataSourceFactory(
                     this.context,
                     com.google.android.exoplayer2.util.Util.getUserAgent(this.context, "newfeedd")
                 )
                 val dataSource = ProgressiveMediaSource.Factory(defaultDataSourceFactory)
                     .createMediaSource(Uri.parse(userList[position].content))
-                player!!.playWhenReady = true
-                vdPost.player = player
                 vdPost.requestFocus()
-                player!!.prepare(dataSource)
-                if (player!!.playbackState == Player.STATE_READY){
-                    player!!.play()
-                }
+                vdPost.player = player
+                player.prepare(dataSource)
+                player.playWhenReady = true
+                vdPost.setKeepContentOnPlayerReset(true)
+//                if (player!!.playbackState == Player.STATE_READY){
+//                    player!!.play()
+//                }
             }
-            tgLike.isChecked = false
-            tgLike.background =
-                context?.let {
-                    getDrawable(
-                        it,
-                        R.drawable.ic_baseline_favorite_border_24
-                    )
-                }
-            tgLike.setOnCheckedChangeListener { _, b ->
-                if (b) {
-                    tgLike.background =
-                        context?.let {
-                            getDrawable(
-                                it,
-                                R.drawable.ic_baseline_favorite_24
-                            )
-                        }
-                    userList[position].like += 2
+            tgLike.setOnClickListener {
+                if (tgLike.drawable.level==0){
+                    tgLike.setImageLevel(1)
+                    userList[position].like += 1
                     txtCountLike.text = userList[position].like.toString()
                     getListPostViewModel.getLike(userList[position].id, userList[position].like)
                     commentViewModel.sendNotification(
@@ -321,24 +271,20 @@ class ListPostAdapter(
                         "Thông báo Like",
                         "${admin.getId().nameAmdin} đã thích bài của ${userList[position].name}"
                     )
-                } else
-                    tgLike.background =
-                        context?.let {
-                            getDrawable(
-                                it,
-                                R.drawable.ic_baseline_favorite_border_24
-                            )
-                        }
-                userList[position].like -= 1
+                }else{
+                    tgLike.setImageLevel(0)
+                    userList[position].like -= 1
                 txtCountLike.text = userList[position].like.toString()
                 getListPostViewModel.getLike(userList[position].id, userList[position].like)
+                }
             }
             cvComment.setOnClickListener(View.OnClickListener {
                 callback.onClickItem(
                     userList[position].comment,
                     userList[position].id,
                     userList[position].name,
-                    userList[position].token
+                    userList[position].token,
+                    position
                 )
 
             })
@@ -393,16 +339,34 @@ class ListPostAdapter(
                 context,
                 callback
             )
-            else -> (holder as VideoViewHolder).bind(userList, position, context, holder, callback)
+            else -> (holder as VideoViewHolder).bind(userList, position, context, holder, callback,player)
         }
     }
 
+    override fun onBindViewHolder(
+        holder: RecyclerView.ViewHolder,
+        position: Int,
+        payloads: MutableList<Any>
+    ) {
+        if (payloads.isEmpty())
+            super.onBindViewHolder(holder, position, payloads)
+        else{
+            holder.itemView.txtComment.text = "${listComment.size} comments"
+        }
+    }
     override fun getItemViewType(position: Int): Int {
+
         return when (userList[position].viewType) {
             1 -> VIEW_TYPE_ONE
             2 -> VIEW_TYPE_TWO
             else -> VIEW_TYPE_THREE
         }
+    }
+    fun updateComment(position: Int,list: ArrayList<Comment>){
+        post = userList[position]
+        post.comment = list
+        notifyItemChanged(position,list.toMutableList())
+        listComment =list
     }
 
     fun updateData(list: ArrayList<Post>) {
@@ -412,9 +376,16 @@ class ListPostAdapter(
 
     interface Callback {
         fun onClickItem(
-            list: ArrayList<Comment>, refChild: String, name: String,token : String
+            list: ArrayList<Comment>, refChild: String, name: String,token : String,position: Int
         )
     }
 
+    fun swap(listComment : List<Comment>){
+        val diffCallBack = CommentDiffCallBack(this.listCmt,listComment)
+        val diffResult = DiffUtil.calculateDiff(diffCallBack)
+        this.listCmt.clear()
+        this.listCmt.addAll(listComment)
+        diffResult.dispatchUpdatesTo(this)
+    }
 
 }

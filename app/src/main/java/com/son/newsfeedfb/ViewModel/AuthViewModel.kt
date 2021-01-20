@@ -1,4 +1,7 @@
 package com.son.newsfeedfb.ViewModel
+
+import android.content.Context
+import android.content.SharedPreferences
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -16,7 +19,7 @@ import com.son.newsfeedfb.RegisterUser
 import com.son.newsfeedfb.di.ClientComponent
 import javax.inject.Inject
 
-class AuthViewModel() {
+class AuthViewModel(context: Context) {
     @Inject
     lateinit var firebaseAuth: FirebaseAuth
     var resultAuth = MutableLiveData<String>("error")
@@ -32,7 +35,9 @@ class AuthViewModel() {
     lateinit var id: String
     var admin = Admin
     var flag: Boolean = true
-    lateinit var tokenId : String
+    lateinit var tokenId: String
+    private val sharedPref: SharedPreferences =
+        context.getSharedPreferences("DB", Context.MODE_PRIVATE)
 
     init {
         var clientComponent: ClientComponent = MyApplication.clientComponent
@@ -43,13 +48,13 @@ class AuthViewModel() {
         })
     }
 
-    fun login(email: String, password: String,activity: MainActivity) {
+    fun login(email: String, password: String, activity: MainActivity) {
         flag = true
         if (email.isNotEmpty() && password.isNotEmpty()) {
             firebaseAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(activity, OnCompleteListener<AuthResult> { task ->
-                    if (task.isSuccessful&&flag) {
-                        flag =false
+                    if (task.isSuccessful && flag) {
+                        flag = false
                         databaseReference.orderByChild("authorID").equalTo(email.replace(".", "-"))
                             .addValueEventListener(object : ValueEventListener {
                                 override fun onCancelled(error: DatabaseError) {
@@ -77,18 +82,51 @@ class AuthViewModel() {
         }
     }
 
-    fun getResultAuth(email: String, password: String,activity: MainActivity): LiveData<String> {
-        login(email, password,activity)
+    fun getIdChild(email: String) {
+        databaseReference.orderByChild("authorID").equalTo(email.replace(".", "-"))
+            .addValueEventListener(object : ValueEventListener {
+                override fun onCancelled(error: DatabaseError) {
+                }
+
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    snapshot.children.forEach {
+                        Log.e("Tag", "parent: ${it.key}")
+                        id = it.key.toString()
+                        admin.getId().idChild = it.key.toString()
+                    }
+                }
+
+            })
+    }
+
+    fun getResultAuth(email: String, password: String, activity: MainActivity): LiveData<String> {
+        login(email, password, activity)
         return resultAuth
     }
 
-    fun getResultRegister(email: String, password: String, name: String,activity: RegisterUser): LiveData<String> {
-        registerUser(email, password, name,activity)
+    fun getResultRegister(
+        email: String,
+        password: String,
+        name: String,
+        activity: RegisterUser
+    ): LiveData<String> {
+        registerUser(email, password, name, activity)
         return resultAuth
     }
 
+    fun saveAuth(key: String, value: String) {
+        val editor: SharedPreferences.Editor = sharedPref.edit()
+        editor.putString(key, value)
+        editor.apply()
+    }
+
+    fun getAuth(key: String): String? {
+        return sharedPref.getString(key, null)
+    }
     fun logOut() {
-        firebaseAuth.signOut()
+        if (firebaseAuth.currentUser!= null){
+            firebaseAuth.signOut()
+        }
     }
 
     fun registerUser(email: String, password: String, name: String, activity: RegisterUser) {
@@ -96,7 +134,7 @@ class AuthViewModel() {
         if (email.isNotEmpty() && password.isNotEmpty() && name.isNotEmpty()) {
             firebaseAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(activity, OnCompleteListener { task ->
-                    if (task.isSuccessful&& flag) {
+                    if (task.isSuccessful && flag) {
                         flag = false
                         val user = firebaseAuth.currentUser
                         val uid = databaseReference.push().key
@@ -132,7 +170,7 @@ class AuthViewModel() {
                             post.content = "Chao mn"
                             post.id = uid.toString()
                             post.avatar =
-                                "https://i.pinimg.com/originals/62/19/87/6219878a5bee02e840796a354beb2fff.png"
+                                "https://wallpapercave.com/wp/wp5184789.jpg"
                             post.createAt = "18-05-2020"
                             post.token = tokenId
                             post.comment = comment

@@ -23,8 +23,11 @@ class CommentViewModel {
     var listPost: ArrayList<Post> = ArrayList()
      var admin =Admin
     var post = Post()
+    var comment = Comment()
     var usersId = MutableLiveData<ArrayList<Post>>()
     val id = admin.getId().idChild
+    var listCmt = MutableLiveData<ArrayList<Comment>>()
+    var listComment: ArrayList<Comment> = ArrayList()
     init {
 //        DaggerClientComponent.builder().build().inject(this)
         var clientComponent : ClientComponent = MyApplication.clientComponent
@@ -34,9 +37,13 @@ class CommentViewModel {
         getObjectCurrent()
         return usersId
     }
+    fun getDataComment(refChild: String): LiveData<ArrayList<Comment>>{
+        dataComment(refChild)
+        return listCmt
+    }
 
      fun getObjectCurrent() {
-        databaseReference.child(id).addValueEventListener(object : ValueEventListener{
+        databaseReference.child(id).addListenerForSingleValueEvent(object : ValueEventListener{
             override fun onCancelled(error: DatabaseError) {
             }
 
@@ -49,15 +56,32 @@ class CommentViewModel {
 
         })
     }
+    fun dataComment(refChild: String){
+        databaseReference.child(refChild).child("comment").addValueEventListener(object :ValueEventListener{
+            override fun onCancelled(error: DatabaseError) {
 
+            }
+
+            override fun onDataChange(snapshot: DataSnapshot) {
+                listComment.clear()
+                snapshot.children.forEach{
+                    comment = it.getValue(Comment::class.java)!!
+                    listComment.add(comment)
+                    listCmt.postValue(listComment)
+                }
+
+            }
+
+        })
+    }
     fun setCommnet(refChild : String,list: List<Comment>){
             databaseReference.child(refChild).child("comment").setValue(list)
 
     }
     fun sendNotification(token : String,title : String, body: String){
         getObjectCurrent()
-        var notification =  Notification(title,body)
-        var message = Message(token,notification)
+        val notification =  Notification(title,body)
+        val message = Message(token,notification)
         apiService.sendNotifcation(message).enqueue(object : Callback<Message>{
             override fun onFailure(call: Call<Message>, t: Throwable) {
                 Log.e("Tag","eror send FCM")

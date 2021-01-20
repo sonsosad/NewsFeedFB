@@ -23,17 +23,16 @@ class RegisterUser : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register_user)
         btnRegister.setOnClickListener(View.OnClickListener {
-            val email = edtEmailRegister.text.toString()
-            val password = edtPasswordRegister.text.toString()
-            val name = edtName.text.toString()
-            authViewModel = AuthViewModel()
+            val email = edtEmailRegister.text.trim().toString()
+            val password = edtPasswordRegister.text.trim().toString()
+            val name = edtName.text.trim().toString()
+            authViewModel = AuthViewModel(this)
             authViewModel.registerUser(email, password, name,this)
             authViewModel.getResultRegister(email, password, name,this).observe(this, Observer {
                 if (it == "successful") {
                     startActivity(Intent(this, TimeLine::class.java))
                 }
             })
-
         })
     }
 
