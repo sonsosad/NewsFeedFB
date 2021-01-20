@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.exoplayer2.ExoPlayerFactory
 import com.google.android.exoplayer2.SimpleExoPlayer
@@ -70,6 +71,7 @@ class PostFragment : Fragment(), ListPostAdapter.Callback, CommentDialog.PutData
         super.onViewCreated(view, savedInstanceState)
         val rvPost = view.rvPost
         rvPost.layoutManager = LinearLayoutManager(this.context)
+        rvPost.addItemDecoration(DividerItemDecoration(this.context,DividerItemDecoration.VERTICAL))
         player =
             this.context?.let { ExoPlayerFactory.newSimpleInstance(it, DefaultTrackSelector()) }!!
         listPostAdapter = ListPostAdapter(this.context, userList, this, player)

@@ -4,7 +4,6 @@
     android:layout_height="match_parent"
     android:layout_weight="10"
     >
-
     <LinearLayout
         android:id="@+id/headerLayout"
         android:layout_width="match_parent"
@@ -24,7 +23,50 @@
             android:textStyle="bold"
             android:layout_margin="5dp"/>
     </LinearLayout>
+    <com.facebook.shimmer.ShimmerFrameLayout
+        android:id="@+id/shimmerFrameLayout"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_gravity="center"
+        android:layout_weight="8.75"
+        android:orientation="vertical">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <include layout="@layout/shimmer_layout" />
+
+            <include layout="@layout/shimmer_layout" />
+
+            <include layout="@layout/shimmer_layout" />
+
+            <include layout="@layout/shimmer_layout" />
+
+            <include layout="@layout/shimmer_layout" />
+
+            <include layout="@layout/shimmer_layout" />
+
+            <include layout="@layout/shimmer_layout" />
+
+            <include layout="@layout/shimmer_layout" />
+
+            <include layout="@layout/shimmer_layout" />
+
+            <include layout="@layout/shimmer_layout" />
+
+            <include layout="@layout/shimmer_layout" />
+
+            <include layout="@layout/shimmer_layout" />
+
+            <include layout="@layout/shimmer_layout" />
+
+            <include layout="@layout/shimmer_layout" />
+
+            <include layout="@layout/shimmer_layout" />
+        </LinearLayout>
+    </com.facebook.shimmer.ShimmerFrameLayout>
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvComment"
         android:layout_width="match_parent"
@@ -32,6 +74,7 @@
         android:layout_margin="5dp"
         android:layout_below="@id/headerLayout"
         android:paddingBottom="50dp"
+        android:visibility="gone"
         android:layout_marginBottom="0dp"
         android:layout_weight="8.75"/>
 

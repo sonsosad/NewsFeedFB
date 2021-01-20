@@ -76,7 +76,6 @@ class CommentViewModel {
     }
     fun setCommnet(refChild : String,list: List<Comment>){
             databaseReference.child(refChild).child("comment").setValue(list)
-
     }
     fun sendNotification(token : String,title : String, body: String){
         getObjectCurrent()

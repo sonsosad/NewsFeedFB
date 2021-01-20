@@ -17,7 +17,9 @@ import com.son.newsfeedfb.Adapter.CommentApdater
 import com.son.newsfeedfb.Model.Comment
 import com.son.newsfeedfb.ViewModel.CommentViewModel
 import de.hdodenhof.circleimageview.CircleImageView
+import kotlinx.android.synthetic.main.cmt_popup_layout.*
 import kotlinx.android.synthetic.main.cmt_popup_layout.view.*
+import kotlinx.android.synthetic.main.post_fragment.*
 
 class CommentDialog(
     var list: ArrayList<Comment>,
@@ -37,6 +39,7 @@ class CommentDialog(
     lateinit var contentComment: String
     lateinit var seaderComment: String
     lateinit var avatarComment: String
+    lateinit var layoutManager: LinearLayoutManager
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -61,6 +64,7 @@ class CommentDialog(
         rvCm = view.findViewById(R.id.rvComment)
         edtWriteComment = view.findViewById(R.id.edtWriteComment)
         imgSend = view.findViewById(R.id.imgSend)
+        layoutManager = LinearLayoutManager(this.context)
         rvCm.layoutManager = LinearLayoutManager(this.context)
         commentApdater = CommentApdater(this.context, listDialog)
         rvCm.adapter = commentApdater
@@ -78,6 +82,9 @@ class CommentDialog(
             }
         })
         commentViewModel.getDataComment(refChild).observe(viewLifecycleOwner, Observer {
+            shimmerFrameLayout.stopShimmer()
+            shimmerFrameLayout.visibility = View.GONE
+            rvCm.visibility = View.VISIBLE
             commentApdater.updateData(it)
             listDialog = it
             putData.sendListComment(it,this.position)
@@ -93,6 +100,11 @@ class CommentDialog(
                 listDialog.addAll(listComment)
                 edtWriteComment.text.clear()
                 commentViewModel.setCommnet(refChild, listDialog)
+                rvCm.postDelayed(Runnable {
+                    kotlin.run {
+                        rvCm.scrollToPosition(rvCm.adapter!!.itemCount-1)
+                    }
+                },1000)
                 commentViewModel.sendNotification(
                     token,
                     "Thông báo",

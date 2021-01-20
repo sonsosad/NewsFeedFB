@@ -30,6 +30,7 @@ import com.son.newsfeedfb.PostFragment
 import com.son.newsfeedfb.R
 import com.son.newsfeedfb.ViewModel.CommentViewModel
 import com.son.newsfeedfb.ViewModel.GetListPostViewModel
+import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.android.synthetic.main.item_video.view.*
 import kotlinx.android.synthetic.main.item_video.view.txtCreateAt
 
@@ -45,6 +46,7 @@ class ListPostAdapter(
     private val listCmt = mutableListOf<Comment>()
     private lateinit var post: Post
     private var listComment = ArrayList<Comment>()
+    private var commentO = Comment()
     class ContentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var imgAvatar: ImageView
         var txtName: TextView
@@ -57,6 +59,9 @@ class ListPostAdapter(
         var getListPostViewModel: GetListPostViewModel
         var commentViewModel: CommentViewModel
         var admin = Admin
+        var imgAvatarComment : CircleImageView
+        var txtNameBottom : TextView
+        var txtCommentBottom : TextView
 
         init {
             imgAvatar = itemView.findViewById(R.id.imgAvatar)
@@ -70,6 +75,9 @@ class ListPostAdapter(
             getListPostViewModel = GetListPostViewModel()
             commentViewModel = CommentViewModel()
             commentViewModel.getObjectCurrent()
+            imgAvatarComment = itemView.findViewById(R.id.imgAvatarComment)
+            txtNameBottom = itemView.findViewById(R.id.txtNameBottom)
+            txtCommentBottom = itemView.findViewById(R.id.txtCommentBottom)
         }
 
         internal fun bind(
@@ -78,6 +86,7 @@ class ListPostAdapter(
             context: Context?,
             callback: Callback
         ) {
+            val pos = userList[position].comment.count()- 1
             Log.e("Tag","list realtime ${userList[position].comment.size}")
             txtName.text = userList[position].name
             txtCreateAt.text = userList[position].createAt
@@ -87,7 +96,10 @@ class ListPostAdapter(
                 userList[position].comment.size.toString() + " comments"
             if (context != null) {
                 Glide.with(context).load(userList[position].avatar).into(imgAvatar)
+                Glide.with(context).load(userList[position].comment[pos].avatar).into(imgAvatarComment)
             }
+            txtCommentBottom.text = userList[position].comment[pos].content
+            txtNameBottom.text = userList[position].comment[pos].seader
             tgLike.setOnClickListener {
                 if (tgLike.drawable.level==0){
                     tgLike.setImageLevel(1)
@@ -130,7 +142,9 @@ class ListPostAdapter(
         var getListPostViewModel: GetListPostViewModel
         var commentViewModel: CommentViewModel
         var admin = Admin
-
+        var imgAvatarComment : CircleImageView
+        var txtNameBottom : TextView
+        var txtCommentBottom : TextView
         init {
             imgAvatar = itemView.findViewById(R.id.imgAvatar)
             txtName = itemView.findViewById(R.id.txtName)
@@ -144,7 +158,9 @@ class ListPostAdapter(
             getListPostViewModel = GetListPostViewModel()
             commentViewModel = CommentViewModel()
             commentViewModel.getObjectCurrent()
-
+            imgAvatarComment = itemView.findViewById(R.id.imgAvatarComment)
+            txtNameBottom = itemView.findViewById(R.id.txtNameBottom)
+            txtCommentBottom = itemView.findViewById(R.id.txtCommentBottom)
         }
 
         @SuppressLint("SetTextI18n")
@@ -154,6 +170,7 @@ class ListPostAdapter(
             context: Context?,
             callback: Callback
         ) {
+            val pos = userList[position].comment.count() - 1
             txtName.text = userList[position].name
             txtCreateAt.text = userList[position].createAt
             txtCountLike.text = userList[position].like.toString()
@@ -165,7 +182,10 @@ class ListPostAdapter(
             }
             if (context != null) {
                 Glide.with(context).load(userList[position].content).into(imgPost)
+                Glide.with(context).load(userList[position].comment[pos].avatar).into(imgAvatarComment)
             }
+            txtCommentBottom.text = userList[position].comment[pos].content
+            txtNameBottom.text = userList[position].comment[pos].seader
             tgLike.setOnClickListener {
                 if (tgLike.drawable.level==0){
                     tgLike.setImageLevel(1)
@@ -209,6 +229,9 @@ class ListPostAdapter(
         private var cvComment: CardView
         var admin = Admin
         private var commentViewModel: CommentViewModel
+        private  var imgAvatarComment : CircleImageView
+        private var txtNameBottom : TextView
+        private var txtCommentBottom : TextView
 
         init {
             imgAvatar = itemView.findViewById(R.id.imgAvatar)
@@ -223,9 +246,12 @@ class ListPostAdapter(
             cvComment = itemView.findViewById(R.id.cvComment)
             commentViewModel = CommentViewModel()
             commentViewModel.getObjectCurrent()
-
+            imgAvatarComment = itemView.findViewById(R.id.imgAvatarComment)
+            txtNameBottom = itemView.findViewById(R.id.txtNameBottom)
+            txtCommentBottom = itemView.findViewById(R.id.txtCommentBottom)
         }
 
+        @SuppressLint("CheckResult")
         fun bind(
             userList: List<Post>,
             position: Int,
@@ -234,7 +260,7 @@ class ListPostAdapter(
             callback: Callback,
             player: SimpleExoPlayer
         ) {
-
+            val pos = userList[position].comment.count() -1
             txtName.text = userList[position].name
             txtCreateAt.text = userList[position].createAt
             txtCountLike.text = userList[position].like.toString()
@@ -243,7 +269,10 @@ class ListPostAdapter(
                 userList[position].comment.size.toString() + " comments"
             if (context != null) {
                 Glide.with(context).load(userList[position].avatar).into(imgAvatar)
+                Glide.with(context).load(userList[position].comment[pos].avatar).into(imgAvatarComment)
             }
+            txtCommentBottom.text = userList[position].comment[pos].content
+            txtNameBottom.text = userList[position].comment[pos].seader
             holder.itemView.apply {
                 val defaultDataSourceFactory = DefaultDataSourceFactory(
                     this.context,
@@ -352,6 +381,9 @@ class ListPostAdapter(
             super.onBindViewHolder(holder, position, payloads)
         else{
             holder.itemView.txtComment.text = "${listComment.size} comments"
+            holder.itemView.txtCommentBottom.text = commentO.content
+            holder.itemView.txtNameBottom.text = commentO.seader
+            context?.let { Glide.with(it).load(commentO.avatar).into(holder.itemView.imgAvatarComment) }
         }
     }
     override fun getItemViewType(position: Int): Int {
@@ -363,10 +395,13 @@ class ListPostAdapter(
         }
     }
     fun updateComment(position: Int,list: ArrayList<Comment>){
+        var comment: Comment = list.get(list.size -1)
         post = userList[position]
         post.comment = list
         notifyItemChanged(position,list.toMutableList())
+        notifyItemChanged(position,comment)
         listComment =list
+        commentO = comment
     }
 
     fun updateData(list: ArrayList<Post>) {
