@@ -9,7 +9,6 @@ import com.google.firebase.database.ValueEventListener
 import com.son.newsfeedfb.Model.*
 import com.son.newsfeedfb.MyApplication
 import com.son.newsfeedfb.di.ClientComponent
-import com.son.newsfeedfb.di.DaggerClientComponent
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -29,19 +28,18 @@ class CommentViewModel {
     var listCmt = MutableLiveData<ArrayList<Comment>>()
     var listComment: ArrayList<Comment> = ArrayList()
     init {
-//        DaggerClientComponent.builder().build().inject(this)
         var clientComponent : ClientComponent = MyApplication.clientComponent
         clientComponent.inject(this)
-    }
-    fun getUsersList(): LiveData<ArrayList<Post>> {
-        getObjectCurrent()
-        return usersId
     }
     fun getDataComment(refChild: String): LiveData<ArrayList<Comment>>{
         dataComment(refChild)
         return listCmt
     }
 
+    fun getUsersList(): LiveData<ArrayList<Post>> {
+        getObjectCurrent()
+        return usersId
+    }
      fun getObjectCurrent() {
         databaseReference.child(id).addListenerForSingleValueEvent(object : ValueEventListener{
             override fun onCancelled(error: DatabaseError) {
@@ -52,6 +50,8 @@ class CommentViewModel {
                     listPost.add(post)
                 usersId.postValue(listPost)
                 admin.getId().nameAmdin = post.name
+                admin.getId().avatarAdmin = post.avatar
+                Log.e("Tag", post.toString())
             }
 
         })

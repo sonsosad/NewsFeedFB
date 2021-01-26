@@ -2,8 +2,9 @@ plugins {
     id 'com.android.application'
     id 'kotlin-android'
     id 'com.google.gms.google-services'
-    id  'kotlin-android-extensions'
+    id 'kotlin-android-extensions'
     id 'kotlin-kapt'
+    id 'realm-android'
 }
 
 android {
@@ -47,6 +48,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-database:19.6.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'com.google.firebase:firebase-messaging:21.0.1'
+    implementation 'com.google.firebase:firebase-storage:19.2.1'
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
@@ -77,5 +79,13 @@ dependencies {
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
     //shimmer
     implementation 'com.facebook.shimmer:shimmer:0.5.0'
+    //rx kt
+//    implementation "io.reactivex.rxjava3:rxkotlin:3.0.1"
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.14'
+    //RxKotlin
+    implementation 'io.reactivex.rxjava2:rxkotlin:2.4.0'
+    //rx biding
+    implementation "com.jakewharton.rxbinding2:rxbinding-kotlin:2.2.0"
+
 
 }

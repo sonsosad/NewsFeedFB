@@ -3,6 +3,7 @@
     package="com.son.newsfeedfb">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:name=".MyApplication"
@@ -12,7 +13,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.NewsFeedFB">
-        <activity android:name=".SplashScreen"
+        <activity
+            android:name=".SplashScreen"
             android:theme="@style/SplashscreenTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

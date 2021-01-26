@@ -1,34 +1,43 @@
 package com.son.newsfeedfb.ViewModel
 
 import android.content.Context
-import android.content.SharedPreferences
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.*
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.messaging.FirebaseMessaging
 import com.son.newsfeedfb.MainActivity
 import com.son.newsfeedfb.Model.Admin
 import com.son.newsfeedfb.Model.Comment
 import com.son.newsfeedfb.Model.Post
+import com.son.newsfeedfb.Model.User
 import com.son.newsfeedfb.MyApplication
 import com.son.newsfeedfb.RegisterUser
 import com.son.newsfeedfb.di.ClientComponent
+import io.reactivex.Observable
+import java.lang.StringBuilder
+import io.reactivex.rxkotlin.toObservable
 import javax.inject.Inject
 
 class AuthViewModel(context: Context) {
     @Inject
     lateinit var firebaseAuth: FirebaseAuth
     var resultAuth = MutableLiveData<String>("error")
+    var rs: String = ""
 
+    //    var observable: Observable<String?>? = Observable.just(rs)
     @Inject
     lateinit var databaseReference: DatabaseReference
 
     @Inject
     lateinit var comment: Comment
+    var user = User("error")
 
     @Inject
     lateinit var post: Post
@@ -36,50 +45,15 @@ class AuthViewModel(context: Context) {
     var admin = Admin
     var flag: Boolean = true
     lateinit var tokenId: String
-    private val sharedPref: SharedPreferences =
-        context.getSharedPreferences("DB", Context.MODE_PRIVATE)
+    var a: Int = 0
 
     init {
-        var clientComponent: ClientComponent = MyApplication.clientComponent
+        val clientComponent: ClientComponent = MyApplication.clientComponent
         clientComponent.inject(this)
         FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener {
             Log.e("Tag", "tokennn ${it.result.toString()}")
             tokenId = it.result.toString()
         })
-    }
-
-    fun login(email: String, password: String, activity: MainActivity) {
-        flag = true
-        if (email.isNotEmpty() && password.isNotEmpty()) {
-            firebaseAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(activity, OnCompleteListener<AuthResult> { task ->
-                    if (task.isSuccessful && flag) {
-                        flag = false
-                        databaseReference.orderByChild("authorID").equalTo(email.replace(".", "-"))
-                            .addValueEventListener(object : ValueEventListener {
-                                override fun onCancelled(error: DatabaseError) {
-
-                                }
-
-                                override fun onDataChange(snapshot: DataSnapshot) {
-                                    resultAuth.value = "successful"
-                                    snapshot.children.forEach {
-                                        Log.e("Tag", "parent: ${it.key}")
-                                        id = it.key.toString()
-                                        admin.getId().idChild = it.key.toString()
-                                    }
-                                }
-
-                            })
-                    } else {
-                        Log.e("TAg", "Error")
-                    }
-                })
-
-        } else {
-            Log.e("TAg", "Error nhap")
-
-        }
     }
 
     fun getIdChild(email: String) {
@@ -90,18 +64,70 @@ class AuthViewModel(context: Context) {
 
                 override fun onDataChange(snapshot: DataSnapshot) {
                     snapshot.children.forEach {
+                        admin.getId().idChild = it.key.toString()
                         Log.e("Tag", "parent: ${it.key}")
                         id = it.key.toString()
-                        admin.getId().idChild = it.key.toString()
                     }
                 }
-
             })
     }
+
+    fun login(email: String, password: String, activity: MainActivity): Observable<String> {
+        val obser = Observable.create<String> {
+            flag = true
+            if (email.isNotEmpty() && password.isNotEmpty()) {
+                firebaseAuth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(activity, OnCompleteListener<AuthResult> { task ->
+                        if (task.isSuccessful && flag) {
+                            it.onNext("successful")
+                            flag = false
+                            databaseReference.orderByChild("authorID")
+                                .equalTo(email.replace(".", "-"))
+                                .addValueEventListener(object : ValueEventListener {
+                                    override fun onCancelled(error: DatabaseError) {
+                                    }
+
+                                    override fun onDataChange(snapshot: DataSnapshot) {
+//                                    observable = Observable.just("successful")
+                                        user.result = "successful"
+                                        resultAuth.value = "successful"
+                                        snapshot.children.forEach {
+                                            id = it.key.toString()
+                                            admin.getId().idChild = it.key.toString()
+                                            Log.e("Tag", "parentzzz: ${admin.getId().idChild}")
+                                        }
+                                    }
+                                })
+                        } else {
+                            Log.e("TAg", "Error")
+                        }
+                    })
+
+            } else {
+                Log.e("TAg", "Error nhap")
+
+            }
+        }
+        return obser
+//        return Observable.defer {
+//            return@defer Observable.just(user.result)
+//        }
+    }
+
 
     fun getResultAuth(email: String, password: String, activity: MainActivity): LiveData<String> {
         login(email, password, activity)
         return resultAuth
+    }
+
+    //    fun getObservable(email: String, password: String, activity: MainActivity): Observable<String?>? {
+//        return Observable.defer{
+//            login(email, password, activity)
+//            return@defer Observable.just(user.result)
+//        }
+//    }
+    fun getObs(): Observable<LiveData<String>> {
+        return Observable.just(resultAuth)
     }
 
     fun getResultRegister(
@@ -114,17 +140,8 @@ class AuthViewModel(context: Context) {
         return resultAuth
     }
 
-    fun saveAuth(key: String, value: String) {
-        val editor: SharedPreferences.Editor = sharedPref.edit()
-        editor.putString(key, value)
-        editor.apply()
-    }
-
-    fun getAuth(key: String): String? {
-        return sharedPref.getString(key, null)
-    }
     fun logOut() {
-        if (firebaseAuth.currentUser!= null){
+        if (firebaseAuth.currentUser != null) {
             firebaseAuth.signOut()
         }
     }

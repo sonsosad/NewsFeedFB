@@ -1,21 +1,30 @@
 package com.son.newsfeedfb.ViewModel
-import android.content.Context
-import android.content.SharedPreferences
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import com.son.newsfeedfb.Model.Admin
+import com.son.newsfeedfb.Model.Comment
 import com.son.newsfeedfb.Model.Post
 import com.son.newsfeedfb.MyApplication
 import com.son.newsfeedfb.di.ClientComponent
-import com.son.newsfeedfb.di.DaggerClientComponent
-import java.text.ParsePosition
+import java.text.SimpleDateFormat
+import java.util.*
 import javax.inject.Inject
+import kotlin.collections.ArrayList
 
 class GetListPostViewModel() : ViewModel() {
     @Inject
      lateinit var databaseReference: DatabaseReference
+    @Inject
+    lateinit var comment: Comment
+    @Inject
+    lateinit var postStt: Post
+    @Inject
+    lateinit var firebaseAuth : FirebaseAuth
+    var admin = Admin
      var list : ArrayList<Post> = ArrayList()
     var post  = Post()
      var usersList = MutableLiveData<ArrayList<Post>>()
@@ -49,5 +58,38 @@ class GetListPostViewModel() : ViewModel() {
         databaseReference = FirebaseDatabase.getInstance().getReference("Post")
         databaseReference.child(refChild).child("like").setValue(countLike)
 
+    }
+    fun getPost(title : String,viewType: Int,content : String,avatar : String,token : String){
+        val uid = databaseReference.push().key
+        val user = firebaseAuth.currentUser
+        val sdf = SimpleDateFormat("dd-M-yyyy")
+        val currentDate = sdf.format(Date())
+        if (uid!=null){
+            val comment = ArrayList<Comment>()
+//            comment.add(
+//                Comment(
+//                    "I love U 3000",
+//                    "Captain America",
+//                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTUk3MyP-RT-r6PoZtKOIK8yBj-4rPEYPbW8g&usqp=CAU"
+//                )
+//            )
+            postStt.authorID = user?.email?.replace(".", "-").toString()
+            postStt.name = admin.getId().nameAmdin
+            postStt.title = title
+            postStt.id = uid.toString()
+            postStt.avatar  = admin.getId().avatarAdmin
+            postStt.token = token
+            postStt.comment = comment
+            postStt.content = content
+            postStt.viewType = viewType
+            postStt.createAt = currentDate
+            postStt.like = 0
+            databaseReference.child(uid).setValue(postStt).addOnCompleteListener{
+                Log.e("Tag","OKkkkk")
+            }.addOnCompleteListener {
+                list.add(1,postStt)
+//                usersList.postValue(list)
+            }
+        }
     }
 }

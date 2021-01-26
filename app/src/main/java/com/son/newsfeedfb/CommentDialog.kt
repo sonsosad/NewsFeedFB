@@ -2,6 +2,7 @@ package com.son.newsfeedfb
 
 import android.app.Dialog
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,7 +23,6 @@ import kotlinx.android.synthetic.main.cmt_popup_layout.view.*
 import kotlinx.android.synthetic.main.post_fragment.*
 
 class CommentDialog(
-    var list: ArrayList<Comment>,
     var refChild: String,
     var name: String,
     var token: String,
@@ -71,7 +71,6 @@ class CommentDialog(
         rvCm.setHasFixedSize(true)
         val txtTitleComment: TextView = view.txtTitleComment
         val imgAvtar: CircleImageView = view.imgAvatarAdmin
-        txtTitleComment.text = "Spider men and ${list.size - 1} Others Comment this"
         commentViewModel = CommentViewModel()
         commentViewModel.getUsersList().observe(viewLifecycleOwner, Observer {
             it.forEach {
@@ -81,14 +80,15 @@ class CommentDialog(
 
             }
         })
-        commentViewModel.getDataComment(refChild).observe(viewLifecycleOwner, Observer {
-            shimmerFrameLayout.stopShimmer()
-            shimmerFrameLayout.visibility = View.GONE
-            rvCm.visibility = View.VISIBLE
-            commentApdater.updateData(it)
-            listDialog = it
-            putData.sendListComment(it,this.position)
 
+        commentViewModel.getDataComment(refChild).observe(viewLifecycleOwner, Observer {
+                shimmerFrameLayout.stopShimmer()
+                shimmerFrameLayout.visibility = View.GONE
+                rvCm.visibility = View.VISIBLE
+                commentApdater.updateData(it)
+                listDialog = it
+                putData.sendListComment(it, this.position)
+                txtTitleComment.text = "Spider men and ${it.size}  Others Comment this"
         })
 
         imgSend.setOnClickListener(View.OnClickListener {
