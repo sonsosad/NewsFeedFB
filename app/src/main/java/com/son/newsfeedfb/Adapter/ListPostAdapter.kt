@@ -313,6 +313,7 @@ class ListPostAdapter(
                 vdPost.player = player
                 player.prepare(dataSource)
                 player.playWhenReady = true
+                player.seekTo(player.currentWindowIndex,player.currentPosition)
                 vdPost.setKeepContentOnPlayerReset(true)
 //                if (player!!.playbackState == Player.STATE_READY){
 //                    player!!.play()
@@ -476,7 +477,7 @@ class ListPostAdapter(
     }
 
     fun updateComment(position: Int, list: ArrayList<Comment>) {
-        var comment: Comment = list.get(list.size - 1)
+        val comment: Comment = list.get(list.size - 1)
         post = userList[position]
         post.comment = list
         notifyItemChanged(position, list.toMutableList())

@@ -21,6 +21,7 @@ import com.son.newsfeedfb.MyApplication
 import com.son.newsfeedfb.RegisterUser
 import com.son.newsfeedfb.di.ClientComponent
 import io.reactivex.Observable
+import io.reactivex.Observable.create
 import java.lang.StringBuilder
 import io.reactivex.rxkotlin.toObservable
 import javax.inject.Inject
@@ -31,7 +32,8 @@ class AuthViewModel(context: Context) {
     var resultAuth = MutableLiveData<String>("error")
     var rs: String = ""
 
-    //    var observable: Observable<String?>? = Observable.just(rs)
+//        var observable: Observable<String?>? = Observable.just(rs)
+
     @Inject
     lateinit var databaseReference: DatabaseReference
 
@@ -73,13 +75,12 @@ class AuthViewModel(context: Context) {
     }
 
     fun login(email: String, password: String, activity: MainActivity): Observable<String> {
-        val obser = Observable.create<String> {
+        val obser = create<String> {
             flag = true
             if (email.isNotEmpty() && password.isNotEmpty()) {
                 firebaseAuth.signInWithEmailAndPassword(email, password)
                     .addOnCompleteListener(activity, OnCompleteListener<AuthResult> { task ->
                         if (task.isSuccessful && flag) {
-                            it.onNext("successful")
                             flag = false
                             databaseReference.orderByChild("authorID")
                                 .equalTo(email.replace(".", "-"))
@@ -89,7 +90,8 @@ class AuthViewModel(context: Context) {
 
                                     override fun onDataChange(snapshot: DataSnapshot) {
 //                                    observable = Observable.just("successful")
-                                        user.result = "successful"
+//                                        user.result = "successful"
+                                        it.onNext("successful")
                                         resultAuth.value = "successful"
                                         snapshot.children.forEach {
                                             id = it.key.toString()
@@ -102,7 +104,6 @@ class AuthViewModel(context: Context) {
                             Log.e("TAg", "Error")
                         }
                     })
-
             } else {
                 Log.e("TAg", "Error nhap")
 
@@ -114,11 +115,6 @@ class AuthViewModel(context: Context) {
 //        }
     }
 
-
-    fun getResultAuth(email: String, password: String, activity: MainActivity): LiveData<String> {
-        login(email, password, activity)
-        return resultAuth
-    }
 
     //    fun getObservable(email: String, password: String, activity: MainActivity): Observable<String?>? {
 //        return Observable.defer{

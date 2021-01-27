@@ -25,6 +25,7 @@
         android:layout_height="30dp"
         android:layout_weight="8"
         android:layout_margin="10dp"
+        android:paddingLeft="10dp"
         android:layout_gravity="center_vertical"
         android:hint="  What's on your mind?"
         android:background="@drawable/custom_editext"/>

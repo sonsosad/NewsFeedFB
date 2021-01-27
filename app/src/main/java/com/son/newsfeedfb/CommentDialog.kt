@@ -77,7 +77,9 @@ class CommentDialog(
                 Glide.with(this).load(it.avatar).into(imgAvtar)
                 seaderComment = it.name
                 avatarComment = it.avatar
-
+                shimmerFrameLayout.stopShimmer()
+                shimmerFrameLayout.visibility = View.GONE
+                rvCm.visibility = View.VISIBLE
             }
         })
 
@@ -90,7 +92,6 @@ class CommentDialog(
                 putData.sendListComment(it, this.position)
                 txtTitleComment.text = "Spider men and ${it.size}  Others Comment this"
         })
-
         imgSend.setOnClickListener(View.OnClickListener {
             if (edtWriteComment.text.toString() != "") {
                 contentComment = edtWriteComment.text.toString()

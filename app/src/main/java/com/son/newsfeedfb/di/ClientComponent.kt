@@ -7,11 +7,13 @@ import com.son.newsfeedfb.ViewModel.AuthViewModel
 import com.son.newsfeedfb.ViewModel.CommentViewModel
 import com.son.newsfeedfb.ViewModel.GetListPostViewModel
 import dagger.Component
+import io.realm.Realm
 import javax.inject.Singleton
 
 @Singleton
 @Component(modules = [FireBaseModule::class,RetrofitModule::class])
 interface ClientComponent {
+    fun realm(): Realm
     fun inject(activity: MainActivity)
     fun inject(fragment: PostFragment)
     fun inject(activity: RegisterUser)

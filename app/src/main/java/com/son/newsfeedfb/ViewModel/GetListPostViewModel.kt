@@ -30,7 +30,7 @@ class GetListPostViewModel() : ViewModel() {
      var usersList = MutableLiveData<ArrayList<Post>>()
     init {
 //        DaggerClientComponent.builder().build().inject(this)
-        var clientComponent : ClientComponent = MyApplication.clientComponent
+        val clientComponent : ClientComponent = MyApplication.clientComponent
         clientComponent.inject(this)
 
     }
@@ -40,12 +40,13 @@ class GetListPostViewModel() : ViewModel() {
     }
 
     private fun getDataFireBase() {
-                databaseReference.addListenerForSingleValueEvent(object :ValueEventListener {
+                databaseReference.addValueEventListener(object :ValueEventListener {
             override fun onCancelled(error: DatabaseError) {
 
             }
 
             override fun onDataChange(snapshot: DataSnapshot) {
+                list.clear()
                 snapshot.children.forEach{
                     post = it.getValue(Post::class.java)!!
                     list.add(post)
@@ -66,13 +67,6 @@ class GetListPostViewModel() : ViewModel() {
         val currentDate = sdf.format(Date())
         if (uid!=null){
             val comment = ArrayList<Comment>()
-//            comment.add(
-//                Comment(
-//                    "I love U 3000",
-//                    "Captain America",
-//                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTUk3MyP-RT-r6PoZtKOIK8yBj-4rPEYPbW8g&usqp=CAU"
-//                )
-//            )
             postStt.authorID = user?.email?.replace(".", "-").toString()
             postStt.name = admin.getId().nameAmdin
             postStt.title = title
@@ -84,10 +78,9 @@ class GetListPostViewModel() : ViewModel() {
             postStt.viewType = viewType
             postStt.createAt = currentDate
             postStt.like = 0
+            list.add(postStt)
             databaseReference.child(uid).setValue(postStt).addOnCompleteListener{
-                Log.e("Tag","OKkkkk")
             }.addOnCompleteListener {
-                list.add(1,postStt)
 //                usersList.postValue(list)
             }
         }

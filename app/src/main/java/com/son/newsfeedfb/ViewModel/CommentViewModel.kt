@@ -56,10 +56,10 @@ class CommentViewModel {
 
         })
     }
-    fun dataComment(refChild: String){
+    private fun dataComment(refChild: String){
         databaseReference.child(refChild).child("comment").addValueEventListener(object :ValueEventListener{
             override fun onCancelled(error: DatabaseError) {
-
+                        Log.e("Tag","no cmt")
             }
 
             override fun onDataChange(snapshot: DataSnapshot) {

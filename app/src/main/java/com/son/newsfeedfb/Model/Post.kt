@@ -1,5 +1,7 @@
 package com.son.newsfeedfb.Model
 
+import io.realm.RealmObject
+
 class Post {
     lateinit var authorID: String
     lateinit var id: String
@@ -15,4 +17,7 @@ class Post {
     override fun toString(): String {
         return "$authorID - $id - $viewType - $avatar - $name - $title - $content - $createAt - $token"
     }
+
+//    override fun compareTo(other: Post): Int {
+//    }
 }

@@ -61,7 +61,7 @@ class PostFragment : Fragment(), ListPostAdapter.Callback, CommentDialog.PutData
     var post = Post()
 
     init {
-        var clientComponent: ClientComponent = MyApplication.clientComponent
+        val clientComponent: ClientComponent = MyApplication.clientComponent
         clientComponent.inject(this)
     }
 
@@ -87,9 +87,10 @@ class PostFragment : Fragment(), ListPostAdapter.Callback, CommentDialog.PutData
         return when (item.itemId) {
             R.id.action_settings -> {
                 firebaseAuth.signOut()
+                (activity as TimeLine).finish()
 //                authViewModel?.logOut()
-                Toast.makeText(context, "Logout is success", Toast.LENGTH_LONG).show()
-                (activity as TimeLine).onBackPressed()
+//                Toast.makeText(context, "Logout is success", Toast.LENGTH_LONG).show()
+//                (activity as TimeLine).onBackPressed()
                 true
             }
             else -> false
@@ -108,10 +109,12 @@ class PostFragment : Fragment(), ListPostAdapter.Callback, CommentDialog.PutData
         rvPost.setHasFixedSize(true)
         getListPostViewModel = GetListPostViewModel()
         getListPostViewModel.getUsersList().observe(viewLifecycleOwner, Observer {
+            userList.clear()
             shimerPost.stopShimmer()
             shimerPost.visibility = View.GONE
             rvPost.visibility = View.VISIBLE
-            listPostAdapter.updateData(it)
+            userList.addAll(it)
+            listPostAdapter.updateData(userList)
         })
         commentViewModel = CommentViewModel()
         commentViewModel.getUsersList().observe(viewLifecycleOwner, Observer {
@@ -169,7 +172,6 @@ class PostFragment : Fragment(), ListPostAdapter.Callback, CommentDialog.PutData
     }
 
     override fun sendListComment(list: ArrayList<Comment>, position: Int) {
-        Log.e("Tag", "commentTest + ${list.size}")
         listPostAdapter.updateComment(position, list)
     }
     private fun checkPermission(){
@@ -204,7 +206,7 @@ class PostFragment : Fragment(), ListPostAdapter.Callback, CommentDialog.PutData
             Toast.makeText(context, "Post is success", Toast.LENGTH_LONG).show()
             rvPost.postDelayed(Runnable {
                 kotlin.run {
-//                                rvPost.scrollToPosition(rvPost.adapter!!.itemCount-1)
+                                rvPost.scrollToPosition(rvPost.adapter!!.itemCount-1)
                     listPostAdapter.notifyDataSetChanged()
                 }
             },1000)
@@ -229,7 +231,7 @@ class PostFragment : Fragment(), ListPostAdapter.Callback, CommentDialog.PutData
                         getListPostViewModel.getPost(content, VIEW_TYPE, directUrl, avatar, token)
                         rvPost.postDelayed(Runnable {
                             kotlin.run {
-//                                rvPost.scrollToPosition(rvPost.adapter!!.itemCount-1)
+                                rvPost.scrollToPosition(rvPost.adapter!!.itemCount-1)
                                 listPostAdapter.notifyDataSetChanged()
                             }
                         },1000)

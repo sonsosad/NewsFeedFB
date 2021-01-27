@@ -31,45 +31,46 @@ import javax.inject.Inject
 class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var firebaseAuth: FirebaseAuth
-
+    private var disposable : Disposable? = null
     init {
         val clientComponent: ClientComponent = MyApplication.clientComponent
         clientComponent.inject(this)
     }
 
-    private val lenghtGreaterThanSix  = ObservableTransformer<String,String>{ observable ->
+    private val lenghtGreaterThanSix = ObservableTransformer<String, String> { observable ->
         observable.flatMap {
             Observable.just(it).map { it.trim() }
-                .filter{it.length >= 6}
+                .filter { it.length >= 6 }
                 .singleOrError()
                 .onErrorResumeNext {
-                    if (it is NoSuchElementException){
+                    if (it is NoSuchElementException) {
                         Single.error(Exception("Length should be greater than 6"))
-                    }else{
+                    } else {
                         Single.error(it)
                     }
                 }
                 .toObservable()
         }
     }
-    private val verifyEmailPattern = ObservableTransformer<String,String> {
+    private val verifyEmailPattern = ObservableTransformer<String, String> {
         it.flatMap {
             Observable.just(it).map {
                 it.trim()
             }
-                .filter{
+                .filter {
                     Patterns.EMAIL_ADDRESS.matcher(it).matches()
                 }
                 .singleOrError()
                 .onErrorResumeNext {
-                    if (it is NoSuchElementException){
+                    if (it is NoSuchElementException) {
                         Single.error(Exception("Email not valid"))
-                    }else{
+                    } else {
                         Single.error(it)
                     }
                 }.toObservable()
         }
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -90,47 +91,36 @@ class MainActivity : AppCompatActivity() {
             val email = userName.text.trim().toString()
             val password = edtPassword.text.trim().toString()
 //            authViewModel.login(email, password, this)
-            authViewModel.login(email, password, this).subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread()).subscribe {
-                    if (it == "successful"){
-                        proBar.visibility = View.GONE
-                        startActivity(Intent(this@MainActivity,TimeLine::class.java))
-                        Toast.makeText(this@MainActivity,"Ok",Toast.LENGTH_LONG).show()
-
-                    }else{
-                        Toast.makeText(this@MainActivity,"Try Again",Toast.LENGTH_LONG).show()
-                        proBar.visibility = View.GONE
-
+             authViewModel.login(email, password, this).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(object : Observer<String> {
+                    override fun onComplete() {
+                        Log.e("Tag","complete")
                     }
-                }
-//                .subscribe(object : Observer<String>{
-//                    override fun onComplete() {
-//
-//                    }
-//
-//                    override fun onSubscribe(d: Disposable) {
-//
-//                    }
-//
-//                    override fun onNext(t: String) {
-//                        if (t =="successful"){
-//                            startActivity(Intent(this@MainActivity,TimeLine::class.java))
-//                            Toast.makeText(this@MainActivity,"ok",Toast.LENGTH_LONG).show()
-//                        }
-//                    }
-//
-//                    override fun onError(e: Throwable) {
-//
-//                    }
-//
-//                })
-//            authViewModel.getResultAuth(email, password, this).observe(this, Observer {
-//                if (it == "successful") {
-//                    startActivity(Intent(this, TimeLine::class.java))
-//                    proBar.visibility = View.GONE
-//                }
-//            }
-//            )
+
+                    override fun onSubscribe(d: Disposable) {
+                        disposable = d
+                        Log.e("Tag","disposable $d")
+                    }
+
+                    override fun onNext(t: String) {
+                        if (t == "successful") {
+                            proBar.visibility = View.GONE
+                            startActivity(Intent(this@MainActivity, TimeLine::class.java))
+                            Toast.makeText(this@MainActivity, "Ok", Toast.LENGTH_LONG).show()
+                            disposable?.dispose()
+                        } else {
+                            Toast.makeText(this@MainActivity, "Try Again", Toast.LENGTH_LONG).show()
+                            proBar.visibility = View.GONE
+
+                        }
+                    }
+
+                    override fun onError(e: Throwable) {
+                        Toast.makeText(this@MainActivity, "Error: ${e.message}", Toast.LENGTH_LONG)
+                            .show()
+                    }
+                })
         })
 
         btnRegister.setOnClickListener(View.OnClickListener {
@@ -138,7 +128,13 @@ class MainActivity : AppCompatActivity() {
         })
 
     }
-    private fun emailField(){
+
+    override fun onDestroy() {
+        super.onDestroy()
+        disposable?.dispose()
+    }
+
+    private fun emailField() {
         RxTextView.afterTextChangeEvents(userName)
             .skipInitialValue()
             .map {
@@ -153,7 +149,8 @@ class MainActivity : AppCompatActivity() {
             })
             .subscribe()
     }
-    private fun passwordField(){
+
+    private fun passwordField() {
         RxTextView.afterTextChangeEvents(edtPassword)
             .skipInitialValue()
             .map {
@@ -167,12 +164,13 @@ class MainActivity : AppCompatActivity() {
             })
             .subscribe()
     }
-    private inline fun retryWhenError(crossinline onError: (ex: Throwable) -> Unit): ObservableTransformer<String, String> = ObservableTransformer { observable ->
-        observable.retryWhen { errors ->
-            errors.flatMap {
-                onError(it)
-                Observable.just("")
+    private inline fun retryWhenError(crossinline onError: (ex: Throwable) -> Unit): ObservableTransformer<String, String> =
+        ObservableTransformer { observable ->
+            observable.retryWhen { errors ->
+                errors.flatMap {
+                    onError(it)
+                    Observable.just("")
+                }
             }
         }
-    }
 }

@@ -14,15 +14,16 @@ import javax.inject.Inject
 class SplashScreen : AppCompatActivity() {
     @Inject
     lateinit var firebaseAuth: FirebaseAuth
-    lateinit var  authViewModel: AuthViewModel
+     lateinit var  authViewModel: AuthViewModel
     init {
-        var clientComponent : ClientComponent = MyApplication.clientComponent
-        clientComponent.inject(this)}
+        val clientComponent : ClientComponent = MyApplication.clientComponent
+        clientComponent.inject(this)
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        authViewModel = AuthViewModel(this)
         if (firebaseAuth.currentUser != null){
-            authViewModel = AuthViewModel(this)
-        authViewModel.getIdChild(firebaseAuth.currentUser?.email.toString())
+            authViewModel.getIdChild(firebaseAuth.currentUser?.email.toString())
         }else{
             Log.e("Tag","aaa")
         }
@@ -31,7 +32,7 @@ class SplashScreen : AppCompatActivity() {
                 startActivity(Intent(this, MainActivity::class.java))
                 finish()
             }
-        }, 2000)
+        }, 2500)
 
     }
 }
